@@ -42,6 +42,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useFirebase } from "@/common/context/FirebaseProvider";
 import { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
+
+import { Scanner } from "@yudiel/react-qr-scanner";
+import { QrCode, Shuffle, X } from "lucide-react";
+import { useState } from "react";
+
 const formSchema = z
 	.object({
 		name: z.string().optional(),
@@ -68,6 +73,15 @@ interface ItemFormDialogProps {
 	organizers: OrganizerEntity[];
 }
 
+// Generate random asset tag
+const generateAssetTag = () => {
+	const prefix = "IT";
+	const number = Math.floor(Math.random() * 99999)
+		.toString()
+		.padStart(5, "0");
+	return `${prefix}-${number}`;
+};
+
 export function ItemFormDialog({
 	open,
 	onOpenChange,
@@ -77,6 +91,8 @@ export function ItemFormDialog({
 }: ItemFormDialogProps) {
 	const { user } = useFirebase();
 	const createMutation = useCreateItem();
+	const [showScanner, setShowScanner] = useState(false);
+
 	const form = useForm<ItemFormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -116,6 +132,26 @@ export function ItemFormDialog({
 				toast.error(`Failed to create item: ${error.message}`);
 			},
 		});
+	};
+
+	const handleGenerateAssetTag = () => {
+		const newTag = generateAssetTag();
+		form.setValue("assetTag", newTag);
+		toast.success(`Generated asset tag: ${newTag}`);
+	};
+
+	const handleScanResult = (result: any[]) => {
+		if (result && result.length > 0) {
+			const scannedValue = result[0].rawValue;
+			form.setValue("assetTag", scannedValue);
+			setShowScanner(false);
+			toast.success(`Scanned asset tag: ${scannedValue}`);
+		}
+	};
+
+	const handleScanError = (error: unknown) => {
+		console.error("Scan error:", error);
+		toast.error("Failed to access camera. Please check permissions.");
 	};
 
 	const getCurrentUserName = () => {
@@ -161,7 +197,27 @@ export function ItemFormDialog({
 								<FormItem>
 									<FormLabel>Asset Tag</FormLabel>
 									<FormControl>
-										<Input placeholder="IT-00123" {...field} />
+										<div className="flex gap-2">
+											<Input placeholder="IT-00123" {...field} />
+											<Button
+												type="button"
+												variant="outline"
+												size="icon"
+												onClick={handleGenerateAssetTag}
+												title="Generate random asset tag"
+											>
+												<Shuffle className="h-4 w-4" />
+											</Button>
+											<Button
+												type="button"
+												variant="outline"
+												size="icon"
+												onClick={() => setShowScanner(true)}
+												title="Scan asset tag"
+											>
+												<QrCode className="h-4 w-4" />
+											</Button>
+										</div>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -297,6 +353,43 @@ export function ItemFormDialog({
 					</form>
 				</Form>
 			</DialogContent>
+
+			{/* Scanner Dialog */}
+			<Dialog open={showScanner} onOpenChange={setShowScanner}>
+				<DialogContent className="sm:max-w-[500px]">
+					<DialogHeader>
+						<DialogTitle>Scan Asset Tag</DialogTitle>
+						<DialogDescription>
+							Point your camera at the barcode or QR code to scan the asset tag.
+						</DialogDescription>
+					</DialogHeader>
+					<div className="relative">
+						<Scanner
+							onScan={handleScanResult}
+							onError={handleScanError}
+							formats={["qr_code", "code_128", "code_39", "ean_13", "ean_8"]}
+							components={{
+								finder: true,
+								torch: true,
+							}}
+							styles={{
+								container: { width: "100%", height: "300px" },
+							}}
+						/>
+						<Button
+							variant="outline"
+							size="icon"
+							className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm"
+							onClick={() => setShowScanner(false)}
+						>
+							<X className="h-4 w-4" />
+						</Button>
+					</div>
+					<div className="text-sm text-muted-foreground text-center">
+						Supports QR codes, Code 128, Code 39, EAN-13, and EAN-8 formats
+					</div>
+				</DialogContent>
+			</Dialog>
 		</Dialog>
 	);
 }

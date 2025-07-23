@@ -37,9 +37,12 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useFirebase } from "@/common/context/FirebaseProvider";
+
+import { Scanner } from "@yudiel/react-qr-scanner";
+import { QrCode, X } from "lucide-react";
 
 const formSchema = z
 	.object({
@@ -75,6 +78,8 @@ export function MovementFormDialog({
 }: MovementFormDialogProps) {
 	const { user } = useFirebase();
 	const createMutation = useCreateMovement();
+	const [showScanner, setShowScanner] = useState(false);
+
 	const form = useForm<MovementFormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -138,6 +143,33 @@ export function MovementFormDialog({
 		});
 	};
 
+	const handleScanResult = (result: any[]) => {
+		if (result && result.length > 0) {
+			const scannedValue = result[0].rawValue;
+
+			// Find item by asset tag or name
+			const foundItem = items.find(
+				(item) =>
+					item.assetTag === scannedValue ||
+					item.name === scannedValue ||
+					item.id === scannedValue
+			);
+
+			if (foundItem) {
+				form.setValue("itemId", foundItem.id);
+				setShowScanner(false);
+				toast.success(`Selected item: ${foundItem.name || foundItem.assetTag}`);
+			} else {
+				toast.error(`No item found with code: ${scannedValue}`);
+			}
+		}
+	};
+
+	const handleScanError = (error: unknown) => {
+		console.error("Scan error:", error);
+		toast.error("Failed to access camera. Please check permissions.");
+	};
+
 	const getCurrentHolder = () => {
 		if (!selectedItem) return null;
 
@@ -195,9 +227,9 @@ export function MovementFormDialog({
 				<DialogHeader>
 					<DialogTitle>Create Movement</DialogTitle>
 					<DialogDescription>
-						Record a new inventory movement. The &quot;from&quot; fields are
-						automatically populated based on the item&apso;s current holder. The
-						&quot;to person&quot; defaults to you but can be changed.
+						Record a new inventory movement. The &quot;from&quot; fields are automatically
+						populated based on the item&apos;s current holder. The &quot;to person&quot;
+						defaults to you but can be changed.
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -209,23 +241,35 @@ export function MovementFormDialog({
 								render={({ field }) => (
 									<FormItem className="md:col-span-2">
 										<FormLabel>Item</FormLabel>
-										<Select
-											onValueChange={field.onChange}
-											defaultValue={field.value}
-										>
-											<FormControl>
-												<SelectTrigger>
-													<SelectValue placeholder="Select an item" />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent>
-												{items.map((i) => (
-													<SelectItem key={i.id} value={i.id}>
-														{i.name || i.assetTag}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
+										<div className="flex gap-2">
+											<Select
+												onValueChange={field.onChange}
+												value={field.value}
+											>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue placeholder="Select an item or scan barcode" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													{items.map((i) => (
+														<SelectItem key={i.id} value={i.id}>
+															{i.name || i.assetTag}{" "}
+															{i.assetTag && i.name && `(${i.assetTag})`}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+											<Button
+												type="button"
+												variant="outline"
+												size="icon"
+												onClick={() => setShowScanner(true)}
+												title="Scan item barcode"
+											>
+												<QrCode className="h-4 w-4" />
+											</Button>
+										</div>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -437,6 +481,44 @@ export function MovementFormDialog({
 					</form>
 				</Form>
 			</DialogContent>
+
+			{/* Scanner Dialog */}
+			<Dialog open={showScanner} onOpenChange={setShowScanner}>
+				<DialogContent className="sm:max-w-[500px]">
+					<DialogHeader>
+						<DialogTitle>Scan Item Barcode</DialogTitle>
+						<DialogDescription>
+							Point your camera at the barcode or QR code to quickly select an
+							item.
+						</DialogDescription>
+					</DialogHeader>
+					<div className="relative">
+						<Scanner
+							onScan={handleScanResult}
+							onError={handleScanError}
+							formats={["qr_code", "code_128", "code_39", "ean_13", "ean_8"]}
+							components={{
+								finder: true,
+								torch: true,
+							}}
+							styles={{
+								container: { width: "100%", height: "300px" },
+							}}
+						/>
+						<Button
+							variant="outline"
+							size="icon"
+							className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm"
+							onClick={() => setShowScanner(false)}
+						>
+							<X className="h-4 w-4" />
+						</Button>
+					</div>
+					<div className="text-sm text-muted-foreground text-center">
+						Scanning will match against asset tags, item names, or IDs
+					</div>
+				</DialogContent>
+			</Dialog>
 		</Dialog>
 	);
 }
