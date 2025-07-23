@@ -4,7 +4,15 @@ import type React from "react";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Boxes, Home, LocateFixed, Repeat, Warehouse } from "lucide-react";
+import {
+	BarChart3,
+	BookOpen,
+	Boxes,
+	Home,
+	LocateFixed,
+	Repeat,
+	Warehouse,
+} from "lucide-react";
 import { Toaster } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -14,6 +22,8 @@ const navigation = [
 	{ name: "Categories", href: "/inventory/categories", icon: Warehouse },
 	{ name: "Locations", href: "/inventory/locations", icon: LocateFixed },
 	{ name: "Movements", href: "/inventory/movements", icon: Repeat },
+	{ name: "Analytics", href: "/inventory/analytics", icon: BarChart3 },
+	{ name: "Catalog", href: "/inventory/catalog", icon: BookOpen },
 ];
 
 export default function InventoryLayout({
