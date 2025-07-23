@@ -39,6 +39,9 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useFirebase } from "@/common/context/FirebaseProvider";
+import { useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
 
 const formSchema = z
 	.object({
@@ -49,7 +52,7 @@ const formSchema = z
 		categoryId: z.string().min(1, "Category is required"),
 		status: z.nativeEnum(InventoryItemStatus).optional(),
 		holderLocationId: z.string().min(1, "Initial location is required"),
-		holderOrganizerId: z.string().min(1, "Assigned person is required"),
+		holderOrganizerId: z.string().optional(),
 	})
 	.refine((data) => data.name || data.assetTag, {
 		message: "Either Name or Asset Tag must be provided.",
@@ -73,11 +76,22 @@ export function ItemFormDialog({
 	locations,
 	organizers,
 }: ItemFormDialogProps) {
+	const { user } = useFirebase();
 	const createMutation = useCreateItem();
 	const form = useForm<ItemFormValues>({
 		resolver: zodResolver(formSchema),
-		defaultValues: { status: InventoryItemStatus.ACTIVE },
+		defaultValues: {
+			status: InventoryItemStatus.ACTIVE,
+			holderOrganizerId: user?.uid || "",
+		},
 	});
+
+	// Set default assigned person when dialog opens and user is available
+	useEffect(() => {
+		if (open && user?.uid) {
+			form.setValue("holderOrganizerId", user.uid);
+		}
+	}, [open, user?.uid, form]);
 
 	const onSubmit = (values: ItemFormValues) => {
 		const payload = {
@@ -88,13 +102,24 @@ export function ItemFormDialog({
 		createMutation.mutate(payload, {
 			onSuccess: () => {
 				toast.success("Item created successfully.");
-				form.reset({ status: InventoryItemStatus.ACTIVE });
+				form.reset({
+					status: InventoryItemStatus.ACTIVE,
+					holderOrganizerId: user?.uid || "",
+				});
 				onOpenChange(false);
 			},
 			onError: (error) => {
 				toast.error(`Failed to create item: ${error.message}`);
 			},
 		});
+	};
+
+	const getCurrentUserName = () => {
+		if (!user?.uid) return "Current User";
+		const currentUser = organizers.find((o) => o.id === user.uid);
+		return currentUser
+			? `${currentUser.firstName} ${currentUser.lastName}`
+			: "Current User";
 	};
 
 	return (
@@ -104,7 +129,7 @@ export function ItemFormDialog({
 					<DialogTitle>Create Item</DialogTitle>
 					<DialogDescription>
 						Add a new item to your inventory. An initial location is required
-						for tracking purposes.
+						for tracking purposes. The item will be assigned to you by default.
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -159,8 +184,10 @@ export function ItemFormDialog({
 									<FormLabel>Category</FormLabel>
 									<Select
 										onValueChange={field.onChange}
-										defaultValue={field.value}
+										defaultValue={field.value || "1"}
 									>
+										{" "}
+										{/* Updated default value */}
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Select a category" />
@@ -186,8 +213,10 @@ export function ItemFormDialog({
 									<FormLabel>Initial Location *</FormLabel>
 									<Select
 										onValueChange={field.onChange}
-										defaultValue={field.value}
+										defaultValue={field.value || "1"}
 									>
+										{" "}
+										{/* Updated default value */}
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Select initial location" />
@@ -210,22 +239,31 @@ export function ItemFormDialog({
 							name="holderOrganizerId"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Assigned Person</FormLabel>
+									<FormLabel>Assigned Person (Defaults to you)</FormLabel>
 									<Select
 										onValueChange={field.onChange}
-										defaultValue={field.value}
+										value={field.value || "1"}
 									>
+										{" "}
+										{/* Updated default value */}
 										<FormControl>
 											<SelectTrigger>
-												<SelectValue placeholder="Select a person" />
+												<SelectValue
+													placeholder={`Defaulted to ${getCurrentUserName()}`}
+												/>
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
+											<SelectItem value="">Unassigned</SelectItem>
 											{organizers.map((o) => (
-												<SelectItem
-													key={o.id}
-													value={o.id}
-												>{`${o.firstName} ${o.lastName}`}</SelectItem>
+												<SelectItem key={o.id} value={o.id}>
+													{`${o.firstName} ${o.lastName}`}
+													{o.id === user?.uid && (
+														<Badge variant="secondary" className="ml-2 text-xs">
+															You
+														</Badge>
+													)}
+												</SelectItem>
 											))}
 										</SelectContent>
 									</Select>

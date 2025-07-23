@@ -39,6 +39,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
+import { useFirebase } from "@/common/context/FirebaseProvider";
 
 const formSchema = z
 	.object({
@@ -72,13 +73,24 @@ export function MovementFormDialog({
 	locations,
 	organizers,
 }: MovementFormDialogProps) {
+	const { user } = useFirebase();
 	const createMutation = useCreateMovement();
 	const form = useForm<MovementFormValues>({
 		resolver: zodResolver(formSchema),
+		defaultValues: {
+			toOrganizerId: user?.uid || "",
+		},
 	});
 
 	const selectedItemId = form.watch("itemId");
 	const selectedItem = items.find((item) => item.id === selectedItemId);
+
+	// Set default "to person" when dialog opens and user is available
+	useEffect(() => {
+		if (open && user?.uid) {
+			form.setValue("toOrganizerId", user.uid);
+		}
+	}, [open, user?.uid, form]);
 
 	// Auto-populate "from" fields when item is selected
 	useEffect(() => {
@@ -110,7 +122,9 @@ export function MovementFormDialog({
 		createMutation.mutate(payload, {
 			onSuccess: () => {
 				toast.success("Movement created successfully.");
-				form.reset();
+				form.reset({
+					toOrganizerId: user?.uid || "",
+				});
 				onOpenChange(false);
 			},
 			onError: (error) => {
@@ -162,15 +176,23 @@ export function MovementFormDialog({
 		return <div className="space-y-1">{parts}</div>;
 	};
 
+	const getCurrentUserName = () => {
+		if (!user?.uid) return "Current User";
+		const currentUser = organizers.find((o) => o.id === user.uid);
+		return currentUser
+			? `${currentUser.firstName} ${currentUser.lastName}`
+			: "Current User";
+	};
+
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="sm:max-w-[700px]">
 				<DialogHeader>
 					<DialogTitle>Create Movement</DialogTitle>
 					<DialogDescription>
-						Record a new inventory movement. The &quot;from&quot; fields are
-						automatically populated based on the item&apos;s current holder. You
-						can transfer between locations, people, or both.
+						Record a new inventory movement. The &quot;from&quot; fields are automatically
+						populated based on the item&apos;s current holder. The &quot;to person&quot;
+						defaults to you but can be changed.
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -342,22 +364,31 @@ export function MovementFormDialog({
 									name="toOrganizerId"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>To Person</FormLabel>
+											<FormLabel>To Person (Defaults to you)</FormLabel>
 											<Select
 												onValueChange={field.onChange}
-												defaultValue={field.value}
+												value={field.value}
 											>
 												<FormControl>
 													<SelectTrigger>
-														<SelectValue placeholder="Select destination person" />
+														<SelectValue
+															placeholder={`Defaulted to ${getCurrentUserName()}`}
+														/>
 													</SelectTrigger>
 												</FormControl>
 												<SelectContent>
 													{organizers.map((o) => (
-														<SelectItem
-															key={o.id}
-															value={o.id}
-														>{`${o.firstName} ${o.lastName}`}</SelectItem>
+														<SelectItem key={o.id} value={o.id}>
+															{`${o.firstName} ${o.lastName}`}
+															{o.id === user?.uid && (
+																<Badge
+																	variant="secondary"
+																	className="ml-2 text-xs"
+																>
+																	You
+																</Badge>
+															)}
+														</SelectItem>
 													))}
 												</SelectContent>
 											</Select>
