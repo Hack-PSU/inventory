@@ -63,14 +63,60 @@ export function MovementTable({
 		[organizers]
 	);
 
-	const getHolderName = (
-		id: string | number | null | undefined,
-		type: "location" | "organizer"
+	const getHolderDisplay = (
+		locationId: number | null | undefined,
+		organizerId: string | null | undefined
 	) => {
-		if (!id) return "N/A";
-		return type === "location"
-			? locationMap.get(id as number)
-			: organizerMap.get(id as string);
+		if (locationId && organizerId) {
+			// Both are present - show both with clear distinction
+			return (
+				<div className="space-y-1">
+					<div className="flex items-center gap-1">
+						<Badge variant="outline" className="text-xs">
+							Location
+						</Badge>
+						<span className="text-sm">
+							{locationMap.get(locationId) || "Unknown Location"}
+						</span>
+					</div>
+					<div className="flex items-center gap-1">
+						<Badge variant="outline" className="text-xs">
+							Person
+						</Badge>
+						<span className="text-sm">
+							{organizerMap.get(organizerId) || "Unknown Person"}
+						</span>
+					</div>
+				</div>
+			);
+		} else if (locationId) {
+			// Only location
+			return (
+				<div className="flex items-center gap-1">
+					<Badge variant="secondary" className="text-xs">
+						Location
+					</Badge>
+					<span className="text-sm">
+						{locationMap.get(locationId) || "Unknown Location"}
+					</span>
+				</div>
+			);
+		} else if (organizerId) {
+			// Only organizer
+			return (
+				<div className="flex items-center gap-1">
+					<Badge variant="secondary" className="text-xs">
+						Person
+					</Badge>
+					<span className="text-sm">
+						{organizerMap.get(organizerId) || "Unknown Person"}
+					</span>
+				</div>
+			);
+		} else {
+			// Neither
+			return <span className="text-muted-foreground text-sm">Unassigned</span>;
+		}
 	};
 
 	const filteredMovements = movements.filter((movement) =>
@@ -107,8 +153,8 @@ export function MovementTable({
 					<TableRow>
 						<TableHead>Item</TableHead>
 						<TableHead>Reason</TableHead>
-						<TableHead>From</TableHead>
-						<TableHead>To</TableHead>
+						<TableHead className="min-w-[150px]">From</TableHead>
+						<TableHead className="min-w-[150px]">To</TableHead>
 						<TableHead>Date</TableHead>
 						<TableHead className="w-[50px] text-right">Actions</TableHead>
 					</TableRow>
@@ -123,12 +169,16 @@ export function MovementTable({
 								<Badge variant="secondary">{movement.reason}</Badge>
 							</TableCell>
 							<TableCell>
-								{getHolderName(movement.fromLocationId, "location") ||
-									getHolderName(movement.fromOrganizerId, "organizer")}
+								{getHolderDisplay(
+									movement.fromLocationId,
+									movement.fromOrganizerId
+								)}
 							</TableCell>
 							<TableCell>
-								{getHolderName(movement.toLocationId, "location") ||
-									getHolderName(movement.toOrganizerId, "organizer")}
+								{getHolderDisplay(
+									movement.toLocationId,
+									movement.toOrganizerId
+								)}
 							</TableCell>
 							<TableCell>
 								{new Date(movement.createdAt * 1000).toLocaleDateString()}
