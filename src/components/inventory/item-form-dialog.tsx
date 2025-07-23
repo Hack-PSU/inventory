@@ -49,7 +49,7 @@ const formSchema = z
 		categoryId: z.string().min(1, "Category is required"),
 		status: z.nativeEnum(InventoryItemStatus).optional(),
 		holderLocationId: z.string().min(1, "Initial location is required"),
-		holderOrganizerId: z.string().optional(),
+		holderOrganizerId: z.string().min(1, "Assigned person is required"),
 	})
 	.refine((data) => data.name || data.assetTag, {
 		message: "Either Name or Asset Tag must be provided.",
@@ -210,14 +210,14 @@ export function ItemFormDialog({
 							name="holderOrganizerId"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Assigned Person (Optional)</FormLabel>
+									<FormLabel>Assigned Person</FormLabel>
 									<Select
 										onValueChange={field.onChange}
 										defaultValue={field.value}
 									>
 										<FormControl>
 											<SelectTrigger>
-												<SelectValue placeholder="Select a person (optional)" />
+												<SelectValue placeholder="Select a person" />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
