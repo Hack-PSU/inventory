@@ -78,7 +78,7 @@ export function MovementFormDialog({
 	const form = useForm<MovementFormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			toOrganizerId: user?.uid || "",
+			toOrganizerId: user?.uid || undefined,
 		},
 	});
 
@@ -98,13 +98,13 @@ export function MovementFormDialog({
 			if (selectedItem.holderLocationId) {
 				form.setValue("fromLocationId", String(selectedItem.holderLocationId));
 			} else {
-				form.setValue("fromLocationId", "");
+				form.setValue("fromLocationId", undefined);
 			}
 
 			if (selectedItem.holderOrganizerId) {
 				form.setValue("fromOrganizerId", selectedItem.holderOrganizerId);
 			} else {
-				form.setValue("fromOrganizerId", "");
+				form.setValue("fromOrganizerId", undefined);
 			}
 		}
 	}, [selectedItem, form]);
@@ -118,12 +118,17 @@ export function MovementFormDialog({
 			toLocationId: values.toLocationId
 				? Number.parseInt(values.toLocationId, 10)
 				: undefined,
+			// Handle unassigned values
+			toOrganizerId:
+				values.toOrganizerId === "unassigned"
+					? undefined
+					: values.toOrganizerId,
 		};
 		createMutation.mutate(payload, {
 			onSuccess: () => {
 				toast.success("Movement created successfully.");
 				form.reset({
-					toOrganizerId: user?.uid || "",
+					toOrganizerId: user?.uid || undefined,
 				});
 				onOpenChange(false);
 			},
@@ -190,9 +195,9 @@ export function MovementFormDialog({
 				<DialogHeader>
 					<DialogTitle>Create Movement</DialogTitle>
 					<DialogDescription>
-						Record a new inventory movement. The &quot;from&quot; fields are automatically
-						populated based on the item&apos;s current holder. The &quot;to person&quot;
-						defaults to you but can be changed.
+						Record a new inventory movement. The &quot;from&quot; fields are
+						automatically populated based on the item&apso;s current holder. The
+						&quot;to person&quot; defaults to you but can be changed.
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -278,7 +283,7 @@ export function MovementFormDialog({
 											<FormLabel>From Location</FormLabel>
 											<Select
 												onValueChange={field.onChange}
-												value={field.value}
+												value={field.value || ""}
 											>
 												<FormControl>
 													<SelectTrigger className="bg-muted">
@@ -286,6 +291,7 @@ export function MovementFormDialog({
 													</SelectTrigger>
 												</FormControl>
 												<SelectContent>
+													<SelectItem value="none">None</SelectItem>
 													{locations.map((l) => (
 														<SelectItem key={l.id} value={String(l.id)}>
 															{l.name}
@@ -305,7 +311,7 @@ export function MovementFormDialog({
 											<FormLabel>From Person</FormLabel>
 											<Select
 												onValueChange={field.onChange}
-												value={field.value}
+												value={field.value || ""}
 											>
 												<FormControl>
 													<SelectTrigger className="bg-muted">
@@ -313,6 +319,7 @@ export function MovementFormDialog({
 													</SelectTrigger>
 												</FormControl>
 												<SelectContent>
+													<SelectItem value="none">None</SelectItem>
 													{organizers.map((o) => (
 														<SelectItem
 															key={o.id}
@@ -340,7 +347,7 @@ export function MovementFormDialog({
 											<FormLabel>To Location</FormLabel>
 											<Select
 												onValueChange={field.onChange}
-												defaultValue={field.value}
+												value={field.value || ""}
 											>
 												<FormControl>
 													<SelectTrigger>
@@ -348,6 +355,7 @@ export function MovementFormDialog({
 													</SelectTrigger>
 												</FormControl>
 												<SelectContent>
+													<SelectItem value="none">None</SelectItem>
 													{locations.map((l) => (
 														<SelectItem key={l.id} value={String(l.id)}>
 															{l.name}
@@ -367,7 +375,7 @@ export function MovementFormDialog({
 											<FormLabel>To Person (Defaults to you)</FormLabel>
 											<Select
 												onValueChange={field.onChange}
-												value={field.value}
+												value={field.value || ""}
 											>
 												<FormControl>
 													<SelectTrigger>
@@ -377,6 +385,7 @@ export function MovementFormDialog({
 													</SelectTrigger>
 												</FormControl>
 												<SelectContent>
+													<SelectItem value="unassigned">Unassigned</SelectItem>
 													{organizers.map((o) => (
 														<SelectItem key={o.id} value={o.id}>
 															{`${o.firstName} ${o.lastName}`}

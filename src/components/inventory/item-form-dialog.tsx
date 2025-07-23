@@ -42,7 +42,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useFirebase } from "@/common/context/FirebaseProvider";
 import { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-
 const formSchema = z
 	.object({
 		name: z.string().optional(),
@@ -82,7 +81,7 @@ export function ItemFormDialog({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			status: InventoryItemStatus.ACTIVE,
-			holderOrganizerId: user?.uid || "",
+			holderOrganizerId: user?.uid || undefined,
 		},
 	});
 
@@ -98,13 +97,18 @@ export function ItemFormDialog({
 			...values,
 			categoryId: Number.parseInt(values.categoryId, 10),
 			holderLocationId: Number.parseInt(values.holderLocationId, 10),
+			// Only include holderOrganizerId if it's not the placeholder value
+			holderOrganizerId:
+				values.holderOrganizerId === "unassigned"
+					? undefined
+					: values.holderOrganizerId,
 		};
 		createMutation.mutate(payload, {
 			onSuccess: () => {
 				toast.success("Item created successfully.");
 				form.reset({
 					status: InventoryItemStatus.ACTIVE,
-					holderOrganizerId: user?.uid || "",
+					holderOrganizerId: user?.uid || undefined,
 				});
 				onOpenChange(false);
 			},
@@ -184,10 +188,8 @@ export function ItemFormDialog({
 									<FormLabel>Category</FormLabel>
 									<Select
 										onValueChange={field.onChange}
-										defaultValue={field.value || "1"}
+										defaultValue={field.value}
 									>
-										{" "}
-										{/* Updated default value */}
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Select a category" />
@@ -213,10 +215,8 @@ export function ItemFormDialog({
 									<FormLabel>Initial Location *</FormLabel>
 									<Select
 										onValueChange={field.onChange}
-										defaultValue={field.value || "1"}
+										defaultValue={field.value}
 									>
-										{" "}
-										{/* Updated default value */}
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Select initial location" />
@@ -240,12 +240,7 @@ export function ItemFormDialog({
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>Assigned Person (Defaults to you)</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										value={field.value || "1"}
-									>
-										{" "}
-										{/* Updated default value */}
+									<Select onValueChange={field.onChange} value={field.value}>
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue
@@ -254,7 +249,7 @@ export function ItemFormDialog({
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
-											<SelectItem value="">Unassigned</SelectItem>
+											<SelectItem value="unassigned">Unassigned</SelectItem>
 											{organizers.map((o) => (
 												<SelectItem key={o.id} value={o.id}>
 													{`${o.firstName} ${o.lastName}`}
