@@ -48,7 +48,7 @@ const formSchema = z
 		notes: z.string().optional(),
 		categoryId: z.string().min(1, "Category is required"),
 		status: z.nativeEnum(InventoryItemStatus).optional(),
-		holderLocationId: z.string().optional(),
+		holderLocationId: z.string().min(1, "Initial location is required"),
 		holderOrganizerId: z.string().optional(),
 	})
 	.refine((data) => data.name || data.assetTag, {
@@ -83,9 +83,7 @@ export function ItemFormDialog({
 		const payload = {
 			...values,
 			categoryId: Number.parseInt(values.categoryId, 10),
-			holderLocationId: values.holderLocationId
-				? Number.parseInt(values.holderLocationId, 10)
-				: undefined,
+			holderLocationId: Number.parseInt(values.holderLocationId, 10),
 		};
 		createMutation.mutate(payload, {
 			onSuccess: () => {
@@ -105,7 +103,8 @@ export function ItemFormDialog({
 				<DialogHeader>
 					<DialogTitle>Create Item</DialogTitle>
 					<DialogDescription>
-						Add a new item to your inventory.
+						Add a new item to your inventory. An initial location is required
+						for tracking purposes.
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -184,14 +183,14 @@ export function ItemFormDialog({
 							name="holderLocationId"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Holder Location</FormLabel>
+									<FormLabel>Initial Location *</FormLabel>
 									<Select
 										onValueChange={field.onChange}
 										defaultValue={field.value}
 									>
 										<FormControl>
 											<SelectTrigger>
-												<SelectValue placeholder="Select a location" />
+												<SelectValue placeholder="Select initial location" />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
@@ -211,14 +210,14 @@ export function ItemFormDialog({
 							name="holderOrganizerId"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Holder Person</FormLabel>
+									<FormLabel>Assigned Person (Optional)</FormLabel>
 									<Select
 										onValueChange={field.onChange}
 										defaultValue={field.value}
 									>
 										<FormControl>
 											<SelectTrigger>
-												<SelectValue placeholder="Select a person" />
+												<SelectValue placeholder="Select a person (optional)" />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>

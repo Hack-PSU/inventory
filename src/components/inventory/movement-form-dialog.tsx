@@ -37,6 +37,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useEffect } from "react";
 
 const formSchema = z.object({
 	itemId: z.string().min(1, "Item is required"),
@@ -70,6 +71,26 @@ export function MovementFormDialog({
 		resolver: zodResolver(formSchema),
 	});
 
+	const selectedItemId = form.watch("itemId");
+	const selectedItem = items.find((item) => item.id === selectedItemId);
+
+	// Auto-populate "from" fields when item is selected
+	useEffect(() => {
+		if (selectedItem) {
+			if (selectedItem.holderLocationId) {
+				form.setValue("fromLocationId", String(selectedItem.holderLocationId));
+				form.setValue("fromOrganizerId", "");
+			} else if (selectedItem.holderOrganizerId) {
+				form.setValue("fromOrganizerId", selectedItem.holderOrganizerId);
+				form.setValue("fromLocationId", "");
+			} else {
+				// Clear both if item has no current holder
+				form.setValue("fromLocationId", "");
+				form.setValue("fromOrganizerId", "");
+			}
+		}
+	}, [selectedItem, form]);
+
 	const onSubmit = (values: MovementFormValues) => {
 		const payload = {
 			...values,
@@ -98,7 +119,8 @@ export function MovementFormDialog({
 				<DialogHeader>
 					<DialogTitle>Create Movement</DialogTitle>
 					<DialogDescription>
-						Record a new inventory movement.
+						Record a new inventory movement. The "from" fields are automatically
+						populated based on the item's current holder.
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -165,14 +187,11 @@ export function MovementFormDialog({
 							name="fromLocationId"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>From Location</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										defaultValue={field.value}
-									>
+									<FormLabel>From Location (Auto-populated)</FormLabel>
+									<Select onValueChange={field.onChange} value={field.value}>
 										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Select a location" />
+											<SelectTrigger className="bg-muted">
+												<SelectValue placeholder="Auto-populated from item" />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
@@ -180,6 +199,31 @@ export function MovementFormDialog({
 												<SelectItem key={l.id} value={String(l.id)}>
 													{l.name}
 												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="fromOrganizerId"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>From Person (Auto-populated)</FormLabel>
+									<Select onValueChange={field.onChange} value={field.value}>
+										<FormControl>
+											<SelectTrigger className="bg-muted">
+												<SelectValue placeholder="Auto-populated from item" />
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											{organizers.map((o) => (
+												<SelectItem
+													key={o.id}
+													value={o.id}
+												>{`${o.firstName} ${o.lastName}`}</SelectItem>
 											))}
 										</SelectContent>
 									</Select>
@@ -207,34 +251,6 @@ export function MovementFormDialog({
 												<SelectItem key={l.id} value={String(l.id)}>
 													{l.name}
 												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="fromOrganizerId"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>From Person</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										defaultValue={field.value}
-									>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Select a person" />
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent>
-											{organizers.map((o) => (
-												<SelectItem
-													key={o.id}
-													value={o.id}
-												>{`${o.firstName} ${o.lastName}`}</SelectItem>
 											))}
 										</SelectContent>
 									</Select>
