@@ -119,8 +119,8 @@ export function MovementFormDialog({
 				<DialogHeader>
 					<DialogTitle>Create Movement</DialogTitle>
 					<DialogDescription>
-						Record a new inventory movement. The "from" fields are automatically
-						populated based on the item's current holder.
+						Record a new inventory movement. The &quot;from&quot; fields are automatically
+						populated based on the item&apos;s current holder.
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
