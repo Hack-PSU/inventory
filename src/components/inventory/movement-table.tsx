@@ -181,7 +181,7 @@ export function MovementTable({
 								)}
 							</TableCell>
 							<TableCell>
-								{new Date(movement.createdAt * 1000).toLocaleDateString()}
+								{new Date(movement.createdAt).toLocaleDateString()}
 							</TableCell>
 							<TableCell>
 								<div className="flex justify-end">
