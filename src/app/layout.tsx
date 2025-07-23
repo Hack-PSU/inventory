@@ -23,7 +23,6 @@ export default function RootLayout({
 			<body className={inter.className}>
 				<LayoutProvider>
 					{children}
-					<BottomNav />
 					<Toaster richColors position="bottom-right" />
 				</LayoutProvider>
 				<Analytics />
