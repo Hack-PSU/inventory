@@ -164,7 +164,7 @@ export function ItemFormDialog({
 			toast.error("Enter or generate an asset tag first.");
 			return;
 		}
-		hasPrintedRef.current = false; // allow print
+		hasPrintedRef.current = false; // allow a new print
 		setBarcodeToPrint(raw);
 	};
 
@@ -174,7 +174,7 @@ export function ItemFormDialog({
 			try {
 				JsBarcode(barcodeRef.current, barcodeToPrint, {
 					format: "CODE128",
-					displayValue: true,
+					displayValue: false, // no duplicate text
 					height: 60,
 					margin: 0,
 					valid: (valid: boolean) => {
@@ -184,7 +184,6 @@ export function ItemFormDialog({
 				hasPrintedRef.current = true;
 				setTimeout(() => {
 					window.print();
-					// reset after a bit in case user wants to print again
 					setTimeout(() => {
 						hasPrintedRef.current = false;
 					}, 2000);
@@ -438,13 +437,14 @@ export function ItemFormDialog({
 							</Button>
 						</div>
 						<div className="text-sm text-muted-foreground text-center">
-							Scanner shows its own overlay; printed label is CODE128 only.
+							Scanner overlay text is from the component; printed label is
+							CODE128.
 						</div>
 					</DialogContent>
 				</Dialog>
 			</Dialog>
 
-			{/* Hidden print area (one label only) */}
+			{/* Hidden print area (single sheet) */}
 			<div id="print-area">
 				<svg ref={barcodeRef}></svg>
 
@@ -455,12 +455,20 @@ export function ItemFormDialog({
 						}
 					}
 					@media print {
+						html,
+						body {
+							width: 2in;
+							height: 1in;
+							margin: 0;
+							padding: 0;
+							overflow: hidden;
+						}
 						body * {
-							visibility: hidden !important;
+							display: none !important;
 						}
 						#print-area,
 						#print-area * {
-							visibility: visible !important;
+							display: block !important;
 						}
 						#print-area {
 							position: fixed;
@@ -471,6 +479,7 @@ export function ItemFormDialog({
 							margin: 0;
 							padding: 0.05in;
 							overflow: hidden;
+							page-break-inside: avoid;
 						}
 						svg {
 							width: 100%;
