@@ -74,7 +74,7 @@ interface ItemFormDialogProps {
 	organizers: OrganizerEntity[];
 }
 
-// Random tag (still fine for CODE128)
+// Generate random asset tag (13 digits just like before, but format irrelevant for CODE128)
 const generateAssetTag = () => {
 	const number = Math.floor(Math.random() * 9999999999999)
 		.toString()
@@ -93,10 +93,9 @@ export function ItemFormDialog({
 	const createMutation = useCreateItem();
 	const [showScanner, setShowScanner] = useState(false);
 
-	// Printing state
+	// Barcode printing state
 	const [barcodeToPrint, setBarcodeToPrint] = useState<string | null>(null);
 	const barcodeRef = useRef<SVGSVGElement>(null);
-	const hasPrintedRef = useRef(false);
 
 	const form = useForm<ItemFormValues>({
 		resolver: zodResolver(formSchema),
@@ -164,34 +163,25 @@ export function ItemFormDialog({
 			toast.error("Enter or generate an asset tag first.");
 			return;
 		}
-		hasPrintedRef.current = false;
+		// Any string is fine for CODE128
 		setBarcodeToPrint(raw);
 	};
 
-	// Generate & print once
+	// Render barcode & trigger print
 	useEffect(() => {
-		if (barcodeToPrint && barcodeRef.current && !hasPrintedRef.current) {
+		if (barcodeToPrint && barcodeRef.current) {
 			try {
 				JsBarcode(barcodeRef.current, barcodeToPrint, {
 					format: "CODE128",
-					displayValue: false, // no human-readable text from JsBarcode
+					displayValue: true,
+					fontSize: 16,
 					height: 60,
 					margin: 0,
 					valid: (valid: boolean) => {
 						if (!valid) throw new Error("Invalid data for CODE128");
 					},
 				});
-				hasPrintedRef.current = true;
-
-				// Print after render
-				setTimeout(() => {
-					window.print();
-					// Reset after print dialog (small delay)
-					setTimeout(() => {
-						hasPrintedRef.current = false;
-						setBarcodeToPrint(null);
-					}, 1500);
-				}, 50);
+				setTimeout(() => window.print(), 50);
 			} catch (e) {
 				console.error(e);
 				toast.error("Failed to generate barcode.");
@@ -427,9 +417,14 @@ export function ItemFormDialog({
 							<Scanner
 								onScan={handleScanResult}
 								onError={handleScanError}
-								formats={["qr_code", "code_128", "code_39", "ean_13", "ean_8"]}
-								components={{ finder: true, torch: true }}
-								styles={{ container: { width: "100%", height: "300px" } }}
+								formats={["qr_code", "code_128", "code_39", "ean_13", "ean_8"]} // scanner can still read others; printing is CODE128 only
+								components={{
+									finder: true,
+									torch: true,
+								}}
+								styles={{
+									container: { width: "100%", height: "300px" },
+								}}
 							/>
 							<Button
 								variant="outline"
@@ -441,16 +436,25 @@ export function ItemFormDialog({
 							</Button>
 						</div>
 						<div className="text-sm text-muted-foreground text-center">
-							Scanner overlay is from the component; printed label is CODE128
-							only.
+							Printing uses CODE128. Scanner supports QR, Code128, Code39,
+							EAN-13/8.
 						</div>
 					</DialogContent>
 				</Dialog>
 			</Dialog>
 
-			{/* Hidden print area (single label) */}
+			{/* Hidden print area */}
 			<div id="print-area">
 				<svg ref={barcodeRef}></svg>
+				<div
+					style={{
+						fontSize: "12pt",
+						textAlign: "center",
+						marginTop: "4px",
+					}}
+				>
+					{barcodeToPrint}
+				</div>
 
 				<style jsx global>{`
 					@media screen {
@@ -459,7 +463,6 @@ export function ItemFormDialog({
 						}
 					}
 					@media print {
-						/* Hide everything visually but keep layout so only one page is used */
 						body * {
 							visibility: hidden !important;
 						}
@@ -469,18 +472,9 @@ export function ItemFormDialog({
 						}
 						#print-area {
 							position: fixed;
-							top: 0;
-							left: 0;
-							width: 2in;
-							height: 1in;
+							inset: 0;
 							margin: 0;
-							padding: 0.05in;
-							overflow: hidden;
-							page-break-inside: avoid;
-						}
-						svg {
-							width: 100%;
-							height: auto;
+							padding: 0.1in;
 						}
 						@page {
 							size: 2in 1in;
