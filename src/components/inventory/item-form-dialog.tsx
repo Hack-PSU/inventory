@@ -174,9 +174,10 @@ export function ItemFormDialog({
 				JsBarcode(barcodeRef.current, barcodeToPrint, {
 					format: "CODE128",
 					displayValue: true,
-					fontSize: 16,
-					height: 60,
+					fontSize: 12,
+					height: 40,
 					margin: 0,
+					textMargin: 2,
 					valid: (valid: boolean) => {
 						if (!valid) throw new Error("Invalid data for CODE128");
 					},
@@ -445,7 +446,9 @@ export function ItemFormDialog({
 
 			{/* Hidden print area */}
 			<div id="print-area">
-				<svg ref={barcodeRef}></svg>
+				<div className="label">
+					<svg ref={barcodeRef} />
+				</div>
 
 				<style jsx global>{`
 					@media screen {
@@ -455,26 +458,31 @@ export function ItemFormDialog({
 					}
 
 					@media print {
-						/* Hide EVERYTHING by default */
 						body * {
 							display: none !important;
 						}
-
-						/* Show only the print area */
 						#print-area,
 						#print-area * {
 							display: block !important;
 							visibility: visible !important;
 						}
 
-						#print-area {
-							position: fixed;
-							inset: 0;
-							margin: 0;
-							padding: 0.1in;
+						/* The physical label */
+						.label {
 							width: 2in;
 							height: 1in;
+							padding: 0.05in; /* small breathing room */
+							box-sizing: border-box;
+							display: flex;
+							align-items: center;
+							justify-content: center;
 							overflow: hidden;
+						}
+
+						/* Make the barcode fill but keep aspect ratio */
+						#print-area svg {
+							width: 100%;
+							height: auto;
 						}
 
 						@page {
