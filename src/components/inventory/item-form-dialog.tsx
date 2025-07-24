@@ -40,12 +40,13 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useFirebase } from "@/common/context/FirebaseProvider";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 
 import { Scanner } from "@yudiel/react-qr-scanner";
-import { QrCode, Shuffle, X } from "lucide-react";
-import { useState } from "react";
+import { QrCode, Shuffle, X, Printer } from "lucide-react";
+
+import JsBarcode from "jsbarcode";
 
 const formSchema = z
 	.object({
@@ -92,6 +93,10 @@ export function ItemFormDialog({
 	const createMutation = useCreateItem();
 	const [showScanner, setShowScanner] = useState(false);
 
+	// Barcode printing state
+	const [barcodeToPrint, setBarcodeToPrint] = useState<string | null>(null);
+	const barcodeRef = useRef<SVGSVGElement>(null);
+
 	const form = useForm<ItemFormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -112,7 +117,6 @@ export function ItemFormDialog({
 			...values,
 			categoryId: Number.parseInt(values.categoryId, 10),
 			holderLocationId: Number.parseInt(values.holderLocationId, 10),
-			// Only include holderOrganizerId if it's not the placeholder value
 			holderOrganizerId:
 				values.holderOrganizerId === "unassigned"
 					? undefined
@@ -153,6 +157,39 @@ export function ItemFormDialog({
 		toast.error("Failed to access camera. Please check permissions.");
 	};
 
+	const handlePrintBarcode = () => {
+		const value = form.getValues("assetTag");
+		if (!value) {
+			toast.error("Enter or generate an asset tag first.");
+			return;
+		}
+		if (!/^\d{13}$/.test(value)) {
+			toast.error("EAN-13 requires exactly 13 digits.");
+			return;
+		}
+		setBarcodeToPrint(value);
+	};
+
+	// Render barcode & trigger print when barcodeToPrint changes
+	useEffect(() => {
+		if (barcodeToPrint && barcodeRef.current) {
+			try {
+				JsBarcode(barcodeRef.current, barcodeToPrint, {
+					format: "EAN13",
+					displayValue: true,
+					fontSize: 16,
+					height: 60,
+					margin: 0,
+				});
+				// Give the browser a tick to paint before printing
+				setTimeout(() => window.print(), 50);
+			} catch (e) {
+				console.error(e);
+				toast.error("Failed to generate barcode.");
+			}
+		}
+	}, [barcodeToPrint]);
+
 	const getCurrentUserName = () => {
 		if (!user?.uid) return "Current User";
 		const currentUser = organizers.find((o) => o.id === user.uid);
@@ -162,233 +199,292 @@ export function ItemFormDialog({
 	};
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[600px]">
-				<DialogHeader>
-					<DialogTitle>Create Item</DialogTitle>
-					<DialogDescription>
-						Add a new item to your inventory. An initial location is required
-						for tracking purposes. The item will be assigned to you by default.
-					</DialogDescription>
-				</DialogHeader>
-				<Form {...form}>
-					<form
-						onSubmit={form.handleSubmit(onSubmit)}
-						className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4"
-					>
-						<FormField
-							control={form.control}
-							name="name"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Name</FormLabel>
-									<FormControl>
-										<Input placeholder="MacBook Pro 16" {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="assetTag"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Asset Tag</FormLabel>
-									<FormControl>
-										<div className="flex gap-2">
-											<Input placeholder="IT-00123" {...field} />
-											<Button
-												type="button"
-												variant="outline"
-												size="icon"
-												onClick={handleGenerateAssetTag}
-												title="Generate random asset tag"
-											>
-												<Shuffle className="h-4 w-4" />
-											</Button>
-											<Button
-												type="button"
-												variant="outline"
-												size="icon"
-												onClick={() => setShowScanner(true)}
-												title="Scan asset tag"
-											>
-												<QrCode className="h-4 w-4" />
-											</Button>
-										</div>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="serialNumber"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Serial Number</FormLabel>
-									<FormControl>
-										<Input placeholder="C02X..." {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="categoryId"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Category</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										defaultValue={field.value}
-									>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Select a category" />
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent>
-											{categories.map((c) => (
-												<SelectItem key={c.id} value={String(c.id)}>
-													{c.name}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="holderLocationId"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Initial Location *</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										defaultValue={field.value}
-									>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Select initial location" />
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent>
-											{locations.map((l) => (
-												<SelectItem key={l.id} value={String(l.id)}>
-													{l.name}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="holderOrganizerId"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Assigned Person (Defaults to you)</FormLabel>
-									<Select onValueChange={field.onChange} value={field.value}>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue
-													placeholder={`Defaulted to ${getCurrentUserName()}`}
-												/>
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent>
-											<SelectItem value="unassigned">Unassigned</SelectItem>
-											{organizers.map((o) => (
-												<SelectItem key={o.id} value={o.id}>
-													{`${o.firstName} ${o.lastName}`}
-													{o.id === user?.uid && (
-														<Badge variant="secondary" className="ml-2 text-xs">
-															You
-														</Badge>
-													)}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="notes"
-							render={({ field }) => (
-								<FormItem className="md:col-span-2">
-									<FormLabel>Notes</FormLabel>
-									<FormControl>
-										<Textarea
-											placeholder="Any relevant notes about the item."
-											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<DialogFooter className="md:col-span-2">
-							<Button
-								type="button"
-								variant="outline"
-								onClick={() => onOpenChange(false)}
-							>
-								Cancel
-							</Button>
-							<Button type="submit" disabled={createMutation.isPending}>
-								{createMutation.isPending ? "Creating..." : "Create"}
-							</Button>
-						</DialogFooter>
-					</form>
-				</Form>
-			</DialogContent>
-
-			{/* Scanner Dialog */}
-			<Dialog open={showScanner} onOpenChange={setShowScanner}>
-				<DialogContent className="sm:max-w-[500px]">
+		<>
+			<Dialog open={open} onOpenChange={onOpenChange}>
+				<DialogContent className="sm:max-w-[600px]">
 					<DialogHeader>
-						<DialogTitle>Scan Asset Tag</DialogTitle>
+						<DialogTitle>Create Item</DialogTitle>
 						<DialogDescription>
-							Point your camera at the barcode or QR code to scan the asset tag.
+							Add a new item to your inventory. An initial location is required
+							for tracking purposes. The item will be assigned to you by
+							default.
 						</DialogDescription>
 					</DialogHeader>
-					<div className="relative">
-						<Scanner
-							onScan={handleScanResult}
-							onError={handleScanError}
-							formats={["qr_code", "code_128", "code_39", "ean_13", "ean_8"]}
-							components={{
-								finder: true,
-								torch: true,
-							}}
-							styles={{
-								container: { width: "100%", height: "300px" },
-							}}
-						/>
-						<Button
-							variant="outline"
-							size="icon"
-							className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm"
-							onClick={() => setShowScanner(false)}
+					<Form {...form}>
+						<form
+							onSubmit={form.handleSubmit(onSubmit)}
+							className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4"
 						>
-							<X className="h-4 w-4" />
-						</Button>
-					</div>
-					<div className="text-sm text-muted-foreground text-center">
-						Supports QR codes, Code 128, Code 39, EAN-13, and EAN-8 formats
-					</div>
+							<FormField
+								control={form.control}
+								name="name"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Name</FormLabel>
+										<FormControl>
+											<Input placeholder="MacBook Pro 16" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="assetTag"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Asset Tag</FormLabel>
+										<FormControl>
+											<div className="flex gap-2">
+												<Input placeholder="IT-00123" {...field} />
+												<Button
+													type="button"
+													variant="outline"
+													size="icon"
+													onClick={handleGenerateAssetTag}
+													title="Generate random asset tag"
+												>
+													<Shuffle className="h-4 w-4" />
+												</Button>
+												<Button
+													type="button"
+													variant="outline"
+													size="icon"
+													onClick={() => setShowScanner(true)}
+													title="Scan asset tag"
+												>
+													<QrCode className="h-4 w-4" />
+												</Button>
+												<Button
+													type="button"
+													variant="outline"
+													size="icon"
+													onClick={handlePrintBarcode}
+													title="Print barcode"
+												>
+													<Printer className="h-4 w-4" />
+												</Button>
+											</div>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="serialNumber"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Serial Number</FormLabel>
+										<FormControl>
+											<Input placeholder="C02X..." {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="categoryId"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Category</FormLabel>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder="Select a category" />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												{categories.map((c) => (
+													<SelectItem key={c.id} value={String(c.id)}>
+														{c.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="holderLocationId"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Initial Location *</FormLabel>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder="Select initial location" />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												{locations.map((l) => (
+													<SelectItem key={l.id} value={String(l.id)}>
+														{l.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="holderOrganizerId"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Assigned Person (Defaults to you)</FormLabel>
+										<Select onValueChange={field.onChange} value={field.value}>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue
+														placeholder={`Defaulted to ${getCurrentUserName()}`}
+													/>
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												<SelectItem value="unassigned">Unassigned</SelectItem>
+												{organizers.map((o) => (
+													<SelectItem key={o.id} value={o.id}>
+														{`${o.firstName} ${o.lastName}`}
+														{o.id === user?.uid && (
+															<Badge
+																variant="secondary"
+																className="ml-2 text-xs"
+															>
+																You
+															</Badge>
+														)}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="notes"
+								render={({ field }) => (
+									<FormItem className="md:col-span-2">
+										<FormLabel>Notes</FormLabel>
+										<FormControl>
+											<Textarea
+												placeholder="Any relevant notes about the item."
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<DialogFooter className="md:col-span-2">
+								<Button
+									type="button"
+									variant="outline"
+									onClick={() => onOpenChange(false)}
+								>
+									Cancel
+								</Button>
+								<Button type="submit" disabled={createMutation.isPending}>
+									{createMutation.isPending ? "Creating..." : "Create"}
+								</Button>
+							</DialogFooter>
+						</form>
+					</Form>
 				</DialogContent>
+
+				{/* Scanner Dialog */}
+				<Dialog open={showScanner} onOpenChange={setShowScanner}>
+					<DialogContent className="sm:max-w-[500px]">
+						<DialogHeader>
+							<DialogTitle>Scan Asset Tag</DialogTitle>
+							<DialogDescription>
+								Point your camera at the barcode or QR code to scan the asset
+								tag.
+							</DialogDescription>
+						</DialogHeader>
+						<div className="relative">
+							<Scanner
+								onScan={handleScanResult}
+								onError={handleScanError}
+								formats={["qr_code", "code_128", "code_39", "ean_13", "ean_8"]}
+								components={{
+									finder: true,
+									torch: true,
+								}}
+								styles={{
+									container: { width: "100%", height: "300px" },
+								}}
+							/>
+							<Button
+								variant="outline"
+								size="icon"
+								className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm"
+								onClick={() => setShowScanner(false)}
+							>
+								<X className="h-4 w-4" />
+							</Button>
+						</div>
+						<div className="text-sm text-muted-foreground text-center">
+							Supports QR codes, Code 128, Code 39, EAN-13, and EAN-8 formats
+						</div>
+					</DialogContent>
+				</Dialog>
 			</Dialog>
-		</Dialog>
+
+			{/* Hidden print area */}
+			<div id="print-area">
+				<svg ref={barcodeRef}></svg>
+				<div
+					style={{
+						fontSize: "12pt",
+						textAlign: "center",
+						marginTop: "4px",
+					}}
+				>
+					{barcodeToPrint}
+				</div>
+
+				<style jsx global>{`
+					/* Hide the print area on screen */
+					@media screen {
+						#print-area {
+							display: none;
+						}
+					}
+					/* Only show the barcode during print */
+					@media print {
+						body * {
+							visibility: hidden !important;
+						}
+						#print-area,
+						#print-area * {
+							visibility: visible !important;
+						}
+						#print-area {
+							position: fixed;
+							inset: 0;
+							margin: 0;
+							padding: 0.1in;
+						}
+						@page {
+							size: 2in 1in;
+							margin: 0;
+						}
+					}
+				`}</style>
+			</div>
+		</>
 	);
 }
