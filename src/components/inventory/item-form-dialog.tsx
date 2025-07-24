@@ -74,7 +74,7 @@ interface ItemFormDialogProps {
 	organizers: OrganizerEntity[];
 }
 
-// Random tag (length irrelevant for CODE128)
+// Random tag (still fine for CODE128)
 const generateAssetTag = () => {
 	const number = Math.floor(Math.random() * 9999999999999)
 		.toString()
@@ -93,7 +93,7 @@ export function ItemFormDialog({
 	const createMutation = useCreateItem();
 	const [showScanner, setShowScanner] = useState(false);
 
-	// Printing state/refs
+	// Printing state
 	const [barcodeToPrint, setBarcodeToPrint] = useState<string | null>(null);
 	const barcodeRef = useRef<SVGSVGElement>(null);
 	const hasPrintedRef = useRef(false);
@@ -164,7 +164,7 @@ export function ItemFormDialog({
 			toast.error("Enter or generate an asset tag first.");
 			return;
 		}
-		hasPrintedRef.current = false; // allow a new print
+		hasPrintedRef.current = false;
 		setBarcodeToPrint(raw);
 	};
 
@@ -174,7 +174,7 @@ export function ItemFormDialog({
 			try {
 				JsBarcode(barcodeRef.current, barcodeToPrint, {
 					format: "CODE128",
-					displayValue: false, // no duplicate text
+					displayValue: false, // no human-readable text from JsBarcode
 					height: 60,
 					margin: 0,
 					valid: (valid: boolean) => {
@@ -182,11 +182,15 @@ export function ItemFormDialog({
 					},
 				});
 				hasPrintedRef.current = true;
+
+				// Print after render
 				setTimeout(() => {
 					window.print();
+					// Reset after print dialog (small delay)
 					setTimeout(() => {
 						hasPrintedRef.current = false;
-					}, 2000);
+						setBarcodeToPrint(null);
+					}, 1500);
 				}, 50);
 			} catch (e) {
 				console.error(e);
@@ -437,14 +441,14 @@ export function ItemFormDialog({
 							</Button>
 						</div>
 						<div className="text-sm text-muted-foreground text-center">
-							Scanner overlay text is from the component; printed label is
-							CODE128.
+							Scanner overlay is from the component; printed label is CODE128
+							only.
 						</div>
 					</DialogContent>
 				</Dialog>
 			</Dialog>
 
-			{/* Hidden print area (single sheet) */}
+			{/* Hidden print area (single label) */}
 			<div id="print-area">
 				<svg ref={barcodeRef}></svg>
 
@@ -455,20 +459,13 @@ export function ItemFormDialog({
 						}
 					}
 					@media print {
-						html,
-						body {
-							width: 2in;
-							height: 1in;
-							margin: 0;
-							padding: 0;
-							overflow: hidden;
-						}
+						/* Hide everything visually but keep layout so only one page is used */
 						body * {
-							display: none !important;
+							visibility: hidden !important;
 						}
 						#print-area,
 						#print-area * {
-							display: block !important;
+							visibility: visible !important;
 						}
 						#print-area {
 							position: fixed;
