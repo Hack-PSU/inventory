@@ -453,20 +453,30 @@ export function ItemFormDialog({
 							display: none;
 						}
 					}
+
 					@media print {
+						/* Hide EVERYTHING by default */
 						body * {
-							visibility: hidden !important;
+							display: none !important;
 						}
+
+						/* Show only the print area */
 						#print-area,
 						#print-area * {
+							display: block !important;
 							visibility: visible !important;
 						}
+
 						#print-area {
 							position: fixed;
 							inset: 0;
 							margin: 0;
 							padding: 0.1in;
+							width: 2in;
+							height: 1in;
+							overflow: hidden;
 						}
+
 						@page {
 							size: 2in 1in;
 							margin: 0;
