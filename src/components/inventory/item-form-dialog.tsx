@@ -75,11 +75,10 @@ interface ItemFormDialogProps {
 
 // Generate random asset tag
 const generateAssetTag = () => {
-	const prefix = "IT";
-	const number = Math.floor(Math.random() * 99999)
+	const number = Math.floor(Math.random() * 9999999999999)
 		.toString()
-		.padStart(5, "0");
-	return `${prefix}-${number}`;
+		.padStart(13, "0");
+	return `${number}`;
 };
 
 export function ItemFormDialog({
