@@ -446,15 +446,6 @@ export function ItemFormDialog({
 			{/* Hidden print area */}
 			<div id="print-area">
 				<svg ref={barcodeRef}></svg>
-				<div
-					style={{
-						fontSize: "12pt",
-						textAlign: "center",
-						marginTop: "4px",
-					}}
-				>
-					{barcodeToPrint}
-				</div>
 
 				<style jsx global>{`
 					@media screen {
