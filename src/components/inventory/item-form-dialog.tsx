@@ -205,7 +205,7 @@ export function ItemFormDialog({
 					displayValue: true,
 					fontSize: 12,
 					height: 40,
-					margin: 0,
+					margin: 2,
 					textMargin: 2,
 					valid: (valid: boolean) => {
 						if (!valid) throw new Error("Invalid data for CODE128");
