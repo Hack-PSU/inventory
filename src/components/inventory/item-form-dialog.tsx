@@ -74,7 +74,7 @@ interface ItemFormDialogProps {
 	organizers: OrganizerEntity[];
 }
 
-// Generate random asset tag
+// Generate random asset tag (13 digits just like before, but format irrelevant for CODE128)
 const generateAssetTag = () => {
 	const number = Math.floor(Math.random() * 9999999999999)
 		.toString()
@@ -105,7 +105,7 @@ export function ItemFormDialog({
 		},
 	});
 
-	// Set default assigned person when dialog opens and user is available
+	// Default assigned person
 	useEffect(() => {
 		if (open && user?.uid) {
 			form.setValue("holderOrganizerId", user.uid);
@@ -158,30 +158,29 @@ export function ItemFormDialog({
 	};
 
 	const handlePrintBarcode = () => {
-		const value = form.getValues("assetTag");
-		if (!value) {
+		const raw = form.getValues("assetTag")?.trim();
+		if (!raw) {
 			toast.error("Enter or generate an asset tag first.");
 			return;
 		}
-		if (!/^\d{13}$/.test(value)) {
-			toast.error("EAN-13 requires exactly 13 digits.");
-			return;
-		}
-		setBarcodeToPrint(value);
+		// Any string is fine for CODE128
+		setBarcodeToPrint(raw);
 	};
 
-	// Render barcode & trigger print when barcodeToPrint changes
+	// Render barcode & trigger print
 	useEffect(() => {
 		if (barcodeToPrint && barcodeRef.current) {
 			try {
 				JsBarcode(barcodeRef.current, barcodeToPrint, {
-					format: "EAN13",
+					format: "CODE128",
 					displayValue: true,
 					fontSize: 16,
 					height: 60,
 					margin: 0,
+					valid: (valid: boolean) => {
+						if (!valid) throw new Error("Invalid data for CODE128");
+					},
 				});
-				// Give the browser a tick to paint before printing
 				setTimeout(() => window.print(), 50);
 			} catch (e) {
 				console.error(e);
@@ -418,7 +417,7 @@ export function ItemFormDialog({
 							<Scanner
 								onScan={handleScanResult}
 								onError={handleScanError}
-								formats={["qr_code", "code_128", "code_39", "ean_13", "ean_8"]}
+								formats={["qr_code", "code_128", "code_39", "ean_13", "ean_8"]} // scanner can still read others; printing is CODE128 only
 								components={{
 									finder: true,
 									torch: true,
@@ -437,7 +436,8 @@ export function ItemFormDialog({
 							</Button>
 						</div>
 						<div className="text-sm text-muted-foreground text-center">
-							Supports QR codes, Code 128, Code 39, EAN-13, and EAN-8 formats
+							Printing uses CODE128. Scanner supports QR, Code128, Code39,
+							EAN-13/8.
 						</div>
 					</DialogContent>
 				</Dialog>
@@ -457,13 +457,11 @@ export function ItemFormDialog({
 				</div>
 
 				<style jsx global>{`
-					/* Hide the print area on screen */
 					@media screen {
 						#print-area {
 							display: none;
 						}
 					}
-					/* Only show the barcode during print */
 					@media print {
 						body * {
 							visibility: hidden !important;
