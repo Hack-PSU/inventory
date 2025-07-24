@@ -153,7 +153,6 @@ export function ItemFormDialog({
 		toast.error("Failed to access camera. Please check permissions.");
 	};
 
-	// ---------------------- PRINT (popup window) ----------------------
 	const handlePrintBarcode = () => {
 		const raw = form.getValues("assetTag")?.trim();
 		if (!raw) {
@@ -169,31 +168,43 @@ export function ItemFormDialog({
 		}
 
 		w.document.write(`
-      <!doctype html>
-      <html>
-        <head>
-          <meta charset="utf-8" />
-          <title>Print Barcode</title>
-          <style>
-            @page { size: 2in 1in; margin: 0; }
-            html, body {
-              margin: 0;
-              width: 2in;
-              height: 1in;
-            }
-            body {
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-            svg { width: 100%; height: auto; }
-          </style>
-        </head>
-        <body>
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Print Barcode</title>
+        <style>
+          @page { size: 2in 1in; margin: 0; }
+          html, body {
+            margin: 0;
+            width: 2in;
+            height: 1in;
+          }
+          body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          /* Padding INSIDE the label for visual margin */
+          #wrap {
+            width: 100%;
+            height: 100%;
+            padding: 0.08in;            /* adjust as needed */
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          svg { width: 100%; height: auto; }
+        </style>
+      </head>
+      <body>
+        <div id="wrap">
           <svg id="barcode"></svg>
-        </body>
-      </html>
-    `);
+        </div>
+      </body>
+    </html>
+  `);
 		w.document.close();
 
 		const doPrint = () => {
@@ -205,13 +216,10 @@ export function ItemFormDialog({
 					displayValue: true,
 					fontSize: 12,
 					height: 40,
-					margin: 2,
+					margin: 0,
 					textMargin: 2,
-					valid: (valid: boolean) => {
-						if (!valid) throw new Error("Invalid data for CODE128");
-					},
 				});
-				// Wait a tick for layout
+
 				setTimeout(() => {
 					w.focus();
 					w.print();
@@ -230,7 +238,6 @@ export function ItemFormDialog({
 			w.onload = doPrint;
 		}
 	};
-	// -----------------------------------------------------------------
 
 	const getCurrentUserName = () => {
 		if (!user?.uid) return "Current User";
