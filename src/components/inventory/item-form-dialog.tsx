@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useFirebase } from "@/common/context/FirebaseProvider";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 
 import { Scanner } from "@yudiel/react-qr-scanner";
@@ -92,10 +92,6 @@ export function ItemFormDialog({
 	const { user } = useFirebase();
 	const createMutation = useCreateItem();
 	const [showScanner, setShowScanner] = useState(false);
-
-	// Barcode printing state
-	const [barcodeToPrint, setBarcodeToPrint] = useState<string | null>(null);
-	const barcodeRef = useRef<SVGSVGElement>(null);
 
 	const form = useForm<ItemFormValues>({
 		resolver: zodResolver(formSchema),
@@ -157,21 +153,54 @@ export function ItemFormDialog({
 		toast.error("Failed to access camera. Please check permissions.");
 	};
 
+	// ---------------------- PRINT (popup window) ----------------------
 	const handlePrintBarcode = () => {
 		const raw = form.getValues("assetTag")?.trim();
 		if (!raw) {
 			toast.error("Enter or generate an asset tag first.");
 			return;
 		}
-		// Any string is fine for CODE128
-		setBarcodeToPrint(raw);
-	};
+		if (typeof window === "undefined") return;
 
-	// Render barcode & trigger print
-	useEffect(() => {
-		if (barcodeToPrint && barcodeRef.current) {
+		const w = window.open("", "PRINT", "width=600,height=400");
+		if (!w) {
+			toast.error("Popup blocked by browser.");
+			return;
+		}
+
+		w.document.write(`
+      <!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Print Barcode</title>
+          <style>
+            @page { size: 2in 1in; margin: 0; }
+            html, body {
+              margin: 0;
+              width: 2in;
+              height: 1in;
+            }
+            body {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            svg { width: 100%; height: auto; }
+          </style>
+        </head>
+        <body>
+          <svg id="barcode"></svg>
+        </body>
+      </html>
+    `);
+		w.document.close();
+
+		const doPrint = () => {
 			try {
-				JsBarcode(barcodeRef.current, barcodeToPrint, {
+				const svg = w.document.querySelector("#barcode");
+				if (!svg) throw new Error("SVG not found in print window");
+				JsBarcode(svg, raw, {
 					format: "CODE128",
 					displayValue: true,
 					fontSize: 12,
@@ -182,13 +211,26 @@ export function ItemFormDialog({
 						if (!valid) throw new Error("Invalid data for CODE128");
 					},
 				});
-				setTimeout(() => window.print(), 50);
-			} catch (e) {
-				console.error(e);
+				// Wait a tick for layout
+				setTimeout(() => {
+					w.focus();
+					w.print();
+					w.close();
+				}, 100);
+			} catch (err) {
+				console.error(err);
 				toast.error("Failed to generate barcode.");
+				w.close();
 			}
+		};
+
+		if (w.document.readyState === "complete") {
+			doPrint();
+		} else {
+			w.onload = doPrint;
 		}
-	}, [barcodeToPrint]);
+	};
+	// -----------------------------------------------------------------
 
 	const getCurrentUserName = () => {
 		if (!user?.uid) return "Current User";
@@ -418,7 +460,7 @@ export function ItemFormDialog({
 							<Scanner
 								onScan={handleScanResult}
 								onError={handleScanError}
-								formats={["qr_code", "code_128", "code_39", "ean_13", "ean_8"]} // scanner can still read others; printing is CODE128 only
+								formats={["qr_code", "code_128", "code_39", "ean_13", "ean_8"]}
 								components={{
 									finder: true,
 									torch: true,
@@ -443,55 +485,6 @@ export function ItemFormDialog({
 					</DialogContent>
 				</Dialog>
 			</Dialog>
-
-			{/* Hidden print area */}
-			<div id="print-area">
-				<div className="label">
-					<svg ref={barcodeRef} />
-				</div>
-
-				<style jsx global>{`
-					@media screen {
-						#print-area {
-							display: none;
-						}
-					}
-
-					@media print {
-						body * {
-							display: none !important;
-						}
-						#print-area,
-						#print-area * {
-							display: block !important;
-							visibility: visible !important;
-						}
-
-						/* The physical label */
-						.label {
-							width: 2in;
-							height: 1in;
-							padding: 0.05in; /* small breathing room */
-							box-sizing: border-box;
-							display: flex;
-							align-items: center;
-							justify-content: center;
-							overflow: hidden;
-						}
-
-						/* Make the barcode fill but keep aspect ratio */
-						#print-area svg {
-							width: 100%;
-							height: auto;
-						}
-
-						@page {
-							size: 2in 1in;
-							margin: 0;
-						}
-					}
-				`}</style>
-			</div>
 		</>
 	);
 }
