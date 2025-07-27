@@ -27,17 +27,23 @@ export default function MovementsPage() {
 		isLoadingOrganizers;
 
 	return (
-		<div className="space-y-6">
-			<header className="flex items-center justify-between">
+		<div className="space-y-4 sm:space-y-6">
+			<header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<h1 className="text-2xl font-bold tracking-tight">Movements</h1>
-					<p className="text-muted-foreground">
+					<h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+						Movements
+					</h1>
+					<p className="text-sm sm:text-base text-muted-foreground">
 						Track your inventory movements.
 					</p>
 				</div>
-				<Button onClick={() => setCreateOpen(true)} disabled={isLoading}>
+				<Button
+					onClick={() => setCreateOpen(true)}
+					disabled={isLoading}
+					className="w-full sm:w-auto"
+				>
 					<PlusCircle className="mr-2 h-4 w-4" />
-					Create Movement
+					<span className="sm:inline">Create Movement</span>
 				</Button>
 			</header>
 

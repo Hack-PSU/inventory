@@ -223,7 +223,7 @@ export function MovementFormDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[700px]">
+			<DialogContent className="w-[calc(100vw-2rem)] max-w-[700px] max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>Create Movement</DialogTitle>
 					<DialogDescription>
@@ -234,12 +234,12 @@ export function MovementFormDialog({
 				</DialogHeader>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="grid grid-cols-1 gap-4">
 							<FormField
 								control={form.control}
 								name="itemId"
 								render={({ field }) => (
-									<FormItem className="md:col-span-2">
+									<FormItem>
 										<FormLabel>Item</FormLabel>
 										<div className="flex gap-2">
 											<Select
@@ -276,7 +276,7 @@ export function MovementFormDialog({
 							/>
 
 							{selectedItem && (
-								<div className="md:col-span-2 p-3 bg-muted rounded-lg">
+								<div className="p-3 bg-muted rounded-lg">
 									<div className="text-sm font-medium mb-2">
 										Current Holder:
 									</div>
@@ -313,10 +313,10 @@ export function MovementFormDialog({
 							/>
 						</div>
 
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<div className="grid grid-cols-1 gap-6">
 							{/* FROM Section */}
 							<div className="space-y-4">
-								<div className="text-sm font-medium text-muted-foreground">
+								<div className="text-sm font-medium text-muted-foreground border-b pb-2 mb-4">
 									FROM (Auto-populated)
 								</div>
 								<FormField
@@ -380,7 +380,7 @@ export function MovementFormDialog({
 
 							{/* TO Section */}
 							<div className="space-y-4">
-								<div className="text-sm font-medium text-muted-foreground">
+								<div className="text-sm font-medium text-muted-foreground border-b pb-2 mb-4">
 									TO (At least one required)
 								</div>
 								<FormField
@@ -416,7 +416,9 @@ export function MovementFormDialog({
 									name="toOrganizerId"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>To Person (Defaults to you)</FormLabel>
+											<FormLabel className="text-sm">
+												To Person (Defaults to you)
+											</FormLabel>
 											<Select
 												onValueChange={field.onChange}
 												value={field.value || ""}
@@ -466,15 +468,20 @@ export function MovementFormDialog({
 							)}
 						/>
 
-						<DialogFooter>
+						<DialogFooter className="flex-col sm:flex-row gap-2 pt-4">
 							<Button
 								type="button"
 								variant="outline"
+								className="w-full sm:w-auto"
 								onClick={() => onOpenChange(false)}
 							>
 								Cancel
 							</Button>
-							<Button type="submit" disabled={createMutation.isPending}>
+							<Button
+								type="submit"
+								disabled={createMutation.isPending}
+								className="w-full sm:w-auto"
+							>
 								{createMutation.isPending ? "Creating..." : "Create"}
 							</Button>
 						</DialogFooter>
@@ -484,7 +491,7 @@ export function MovementFormDialog({
 
 			{/* Scanner Dialog */}
 			<Dialog open={showScanner} onOpenChange={setShowScanner}>
-				<DialogContent className="sm:max-w-[500px]">
+				<DialogContent className="w-[calc(100vw-2rem)] max-w-[500px] max-h-[90vh]">
 					<DialogHeader>
 						<DialogTitle>Scan Item Barcode</DialogTitle>
 						<DialogDescription>
@@ -502,7 +509,7 @@ export function MovementFormDialog({
 								torch: true,
 							}}
 							styles={{
-								container: { width: "100%", height: "300px" },
+								container: { width: "100%", height: "250px" },
 							}}
 						/>
 						<Button

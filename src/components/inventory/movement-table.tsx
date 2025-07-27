@@ -141,73 +141,91 @@ export function MovementTable({
 
 	return (
 		<div className="rounded-lg border">
-			<div className="p-4">
+			<div className="p-3 sm:p-4">
 				<SearchInput
 					value={filter}
 					onChange={(e: any) => setFilter(e.target.value)}
 					placeholder="Filter by item name/tag..."
 				/>
 			</div>
-			<Table>
-				<TableHeader>
-					<TableRow>
-						<TableHead>Item</TableHead>
-						<TableHead>Reason</TableHead>
-						<TableHead className="min-w-[150px]">From</TableHead>
-						<TableHead className="min-w-[150px]">To</TableHead>
-						<TableHead>Date</TableHead>
-						<TableHead className="w-[50px] text-right">Actions</TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{filteredMovements.map((movement) => (
-						<TableRow key={movement.id}>
-							<TableCell className="font-medium">
-								{itemMap.get(movement.itemId)}
-							</TableCell>
-							<TableCell>
-								<Badge variant="secondary">{movement.reason}</Badge>
-							</TableCell>
-							<TableCell>
-								{getHolderDisplay(
-									movement.fromLocationId,
-									movement.fromOrganizerId
-								)}
-							</TableCell>
-							<TableCell>
-								{getHolderDisplay(
-									movement.toLocationId,
-									movement.toOrganizerId
-								)}
-							</TableCell>
-							<TableCell>
-								{new Date(movement.createdAt).toLocaleDateString()}
-							</TableCell>
-							<TableCell>
-								<div className="flex justify-end">
-									<DropdownMenu>
-										<DropdownMenuTrigger asChild>
-											<Button variant="ghost" className="h-8 w-8 p-0">
-												<span className="sr-only">Open menu</span>
-												<MoreHorizontal className="h-4 w-4" />
-											</Button>
-										</DropdownMenuTrigger>
-										<DropdownMenuContent align="end">
-											<DropdownMenuItem
-												className="text-red-500"
-												onClick={() => setItemToDelete(movement)}
-											>
-												<Trash2 className="mr-2 h-4 w-4" />
-												Delete
-											</DropdownMenuItem>
-										</DropdownMenuContent>
-									</DropdownMenu>
-								</div>
-							</TableCell>
+			<div className="overflow-x-auto">
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead className="whitespace-nowrap">Item</TableHead>
+							<TableHead className="whitespace-nowrap">Reason</TableHead>
+							<TableHead className="min-w-[120px] sm:min-w-[150px] whitespace-nowrap">
+								From
+							</TableHead>
+							<TableHead className="min-w-[120px] sm:min-w-[150px] whitespace-nowrap">
+								To
+							</TableHead>
+							<TableHead className="whitespace-nowrap">Date</TableHead>
+							<TableHead className="w-[50px] text-right whitespace-nowrap">
+								Actions
+							</TableHead>
 						</TableRow>
-					))}
-				</TableBody>
-			</Table>
+					</TableHeader>
+					<TableBody>
+						{filteredMovements.map((movement) => (
+							<TableRow key={movement.id}>
+								<TableCell className="font-medium">
+									<div className="min-w-0">
+										<div className="truncate text-sm sm:text-base">
+											{itemMap.get(movement.itemId)}
+										</div>
+									</div>
+								</TableCell>
+								<TableCell>
+									<Badge variant="secondary" className="text-xs sm:text-sm">
+										{movement.reason}
+									</Badge>
+								</TableCell>
+								<TableCell className="min-w-0">
+									<div className="text-xs sm:text-sm">
+										{getHolderDisplay(
+											movement.fromLocationId,
+											movement.fromOrganizerId
+										)}
+									</div>
+								</TableCell>
+								<TableCell className="min-w-0">
+									<div className="text-xs sm:text-sm">
+										{getHolderDisplay(
+											movement.toLocationId,
+											movement.toOrganizerId
+										)}
+									</div>
+								</TableCell>
+								<TableCell className="whitespace-nowrap text-xs sm:text-sm">
+									{new Date(movement.createdAt).toLocaleDateString()}
+								</TableCell>
+								<TableCell>
+									<div className="flex justify-end">
+										<DropdownMenu>
+											<DropdownMenuTrigger asChild>
+												<Button variant="ghost" className="h-8 w-8 p-0">
+													<span className="sr-only">Open menu</span>
+													<MoreHorizontal className="h-4 w-4" />
+												</Button>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent align="end">
+												<DropdownMenuItem
+													className="text-red-500"
+													onClick={() => setItemToDelete(movement)}
+												>
+													<Trash2 className="mr-2 h-4 w-4" />
+													Delete
+												</DropdownMenuItem>
+											</DropdownMenuContent>
+										</DropdownMenu>
+									</div>
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</div>
 			<ConfirmDeleteDialog
 				open={!!itemToDelete}
 				onOpenChange={(open) => !open && setItemToDelete(null)}
