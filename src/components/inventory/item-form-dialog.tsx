@@ -45,6 +45,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { QrCode, Shuffle, X, Printer } from "lucide-react";
+import { CameraSelector } from "./camera-selector";
 
 import JsBarcode from "jsbarcode";
 
@@ -92,6 +93,7 @@ export function ItemFormDialog({
 	const { user } = useFirebase();
 	const createMutation = useCreateItem();
 	const [showScanner, setShowScanner] = useState(false);
+	const [selectedCameraId, setSelectedCameraId] = useState<string>("");
 
 	const form = useForm<ItemFormValues>({
 		resolver: zodResolver(formSchema),
@@ -260,10 +262,7 @@ export function ItemFormDialog({
 						</DialogDescription>
 					</DialogHeader>
 					<Form {...form}>
-						<form
-							onSubmit={form.handleSubmit(onSubmit)}
-							className="space-y-4"
-						>
+						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 							<div className="grid grid-cols-1 gap-4">
 								<FormField
 									control={form.control}
@@ -398,7 +397,10 @@ export function ItemFormDialog({
 									render={({ field }) => (
 										<FormItem>
 											<FormLabel>Assigned Person (Defaults to you)</FormLabel>
-											<Select onValueChange={field.onChange} value={field.value}>
+											<Select
+												onValueChange={field.onChange}
+												value={field.value}
+											>
 												<FormControl>
 													<SelectTrigger>
 														<SelectValue
@@ -453,8 +455,8 @@ export function ItemFormDialog({
 								>
 									Cancel
 								</Button>
-								<Button 
-									type="submit" 
+								<Button
+									type="submit"
 									disabled={createMutation.isPending}
 									className="w-full sm:w-auto"
 								>
@@ -475,27 +477,45 @@ export function ItemFormDialog({
 								tag.
 							</DialogDescription>
 						</DialogHeader>
-						<div className="relative">
-							<Scanner
-								onScan={handleScanResult}
-								onError={handleScanError}
-								formats={["qr_code", "code_128", "code_39", "ean_13", "ean_8"]}
-								components={{
-									finder: true,
-									torch: true,
-								}}
-								styles={{
-									container: { width: "100%", height: "250px" },
-								}}
+						<div className="space-y-3">
+							<CameraSelector
+								selectedDeviceId={selectedCameraId}
+								onDeviceChange={setSelectedCameraId}
+								className="justify-center"
 							/>
-							<Button
-								variant="outline"
-								size="icon"
-								className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm"
-								onClick={() => setShowScanner(false)}
-							>
-								<X className="h-4 w-4" />
-							</Button>
+							<div className="relative">
+								<Scanner
+									onScan={handleScanResult}
+									onError={handleScanError}
+									formats={[
+										"qr_code",
+										"code_128",
+										"code_39",
+										"ean_13",
+										"ean_8",
+									]}
+									constraints={{
+										deviceId: selectedCameraId
+											? { exact: selectedCameraId }
+											: undefined,
+									}}
+									components={{
+										finder: true,
+										torch: true,
+									}}
+									styles={{
+										container: { width: "100%", height: "250px" },
+									}}
+								/>
+								<Button
+									variant="outline"
+									size="icon"
+									className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm"
+									onClick={() => setShowScanner(false)}
+								>
+									<X className="h-4 w-4" />
+								</Button>
+							</div>
 						</div>
 						<div className="text-sm text-muted-foreground text-center">
 							Printing uses CODE128. Scanner supports QR, Code128, Code39,

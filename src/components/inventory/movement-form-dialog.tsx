@@ -43,6 +43,7 @@ import { useFirebase } from "@/common/context/FirebaseProvider";
 
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { QrCode, X } from "lucide-react";
+import { CameraSelector } from "./camera-selector";
 
 const formSchema = z
 	.object({
@@ -79,6 +80,7 @@ export function MovementFormDialog({
 	const { user } = useFirebase();
 	const createMutation = useCreateMovement();
 	const [showScanner, setShowScanner] = useState(false);
+	const [selectedCameraId, setSelectedCameraId] = useState<string>("");
 
 	const form = useForm<MovementFormValues>({
 		resolver: zodResolver(formSchema),
@@ -499,27 +501,39 @@ export function MovementFormDialog({
 							item.
 						</DialogDescription>
 					</DialogHeader>
-					<div className="relative">
-						<Scanner
-							onScan={handleScanResult}
-							onError={handleScanError}
-							formats={["qr_code", "code_128", "code_39", "ean_13", "ean_8"]}
-							components={{
-								finder: true,
-								torch: true,
-							}}
-							styles={{
-								container: { width: "100%", height: "250px" },
-							}}
+					<div className="space-y-3">
+						<CameraSelector
+							selectedDeviceId={selectedCameraId}
+							onDeviceChange={setSelectedCameraId}
+							className="justify-center"
 						/>
-						<Button
-							variant="outline"
-							size="icon"
-							className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm"
-							onClick={() => setShowScanner(false)}
-						>
-							<X className="h-4 w-4" />
-						</Button>
+						<div className="relative">
+							<Scanner
+								onScan={handleScanResult}
+								onError={handleScanError}
+								formats={["qr_code", "code_128", "code_39", "ean_13", "ean_8"]}
+								constraints={{
+									deviceId: selectedCameraId
+										? { exact: selectedCameraId }
+										: undefined,
+								}}
+								components={{
+									finder: true,
+									torch: true,
+								}}
+								styles={{
+									container: { width: "100%", height: "250px" },
+								}}
+							/>
+							<Button
+								variant="outline"
+								size="icon"
+								className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm"
+								onClick={() => setShowScanner(false)}
+							>
+								<X className="h-4 w-4" />
+							</Button>
+						</div>
 					</div>
 					<div className="text-sm text-muted-foreground text-center">
 						Scanning will match against asset tags, item names, or IDs

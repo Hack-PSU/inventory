@@ -22,11 +22,36 @@ interface NavItem {
 
 const navigation: NavItem[] = [
 	{ name: "Items", href: "/inventory/items", icon: Boxes, shortName: "Items" },
-	{ name: "Categories", href: "/inventory/categories", icon: Warehouse, shortName: "Categories" },
-	{ name: "Locations", href: "/inventory/locations", icon: LocateFixed, shortName: "Locations" },
-	{ name: "Movements", href: "/inventory/movements", icon: Repeat, shortName: "Movements" },
-	{ name: "Analytics", href: "/inventory/analytics", icon: BarChart3, shortName: "Analytics" },
-	{ name: "Catalog", href: "/inventory/catalog", icon: BookOpen, shortName: "Catalog" },
+	{
+		name: "Categories",
+		href: "/inventory/categories",
+		icon: Warehouse,
+		shortName: "Categories",
+	},
+	{
+		name: "Locations",
+		href: "/inventory/locations",
+		icon: LocateFixed,
+		shortName: "Locations",
+	},
+	{
+		name: "Movements",
+		href: "/inventory/movements",
+		icon: Repeat,
+		shortName: "Movements",
+	},
+	{
+		name: "Analytics",
+		href: "/inventory/analytics",
+		icon: BarChart3,
+		shortName: "Analytics",
+	},
+	{
+		name: "Catalog",
+		href: "/inventory/catalog",
+		icon: BookOpen,
+		shortName: "Catalog",
+	},
 ];
 
 export function InventoryBottomNavbar() {
@@ -71,16 +96,20 @@ export function InventoryBottomNavbar() {
 							)}
 
 							{/* Icon */}
-							<Icon className={cn(
-								"h-5 w-5 mb-1 transition-all duration-200 relative z-10",
-								active && "scale-110"
-							)} />
+							<Icon
+								className={cn(
+									"h-5 w-5 mb-1 transition-all duration-200 relative z-10",
+									active && "scale-110"
+								)}
+							/>
 
 							{/* Label - only show on larger screens */}
-							<span className={cn(
-								"text-xs font-medium leading-none transition-all duration-200 relative z-10",
-								"hidden sm:block"
-							)}>
+							<span
+								className={cn(
+									"text-xs font-medium leading-none transition-all duration-200 relative z-10",
+									"hidden sm:block"
+								)}
+							>
 								{item.shortName}
 							</span>
 
