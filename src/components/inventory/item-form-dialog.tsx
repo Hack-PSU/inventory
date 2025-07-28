@@ -250,7 +250,7 @@ export function ItemFormDialog({
 	return (
 		<>
 			<Dialog open={open} onOpenChange={onOpenChange}>
-				<DialogContent className="sm:max-w-[600px]">
+				<DialogContent className="w-[calc(100vw-2rem)] max-w-[700px] max-h-[90vh] overflow-y-auto">
 					<DialogHeader>
 						<DialogTitle>Create Item</DialogTitle>
 						<DialogDescription>
@@ -262,190 +262,202 @@ export function ItemFormDialog({
 					<Form {...form}>
 						<form
 							onSubmit={form.handleSubmit(onSubmit)}
-							className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4"
+							className="space-y-4"
 						>
-							<FormField
-								control={form.control}
-								name="name"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Name</FormLabel>
-										<FormControl>
-											<Input placeholder="MacBook Pro 16" {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="assetTag"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Asset Tag</FormLabel>
-										<FormControl>
-											<div className="flex gap-2">
-												<Input placeholder="IT-00123" {...field} />
-												<Button
-													type="button"
-													variant="outline"
-													size="icon"
-													onClick={handleGenerateAssetTag}
-													title="Generate random asset tag"
-												>
-													<Shuffle className="h-4 w-4" />
-												</Button>
-												<Button
-													type="button"
-													variant="outline"
-													size="icon"
-													onClick={() => setShowScanner(true)}
-													title="Scan asset tag"
-												>
-													<QrCode className="h-4 w-4" />
-												</Button>
-												<Button
-													type="button"
-													variant="outline"
-													size="icon"
-													onClick={handlePrintBarcode}
-													title="Print barcode"
-												>
-													<Printer className="h-4 w-4" />
-												</Button>
-											</div>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="serialNumber"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Serial Number</FormLabel>
-										<FormControl>
-											<Input placeholder="C02X..." {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="categoryId"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Category</FormLabel>
-										<Select
-											onValueChange={field.onChange}
-											defaultValue={field.value}
-										>
+							<div className="grid grid-cols-1 gap-4">
+								<FormField
+									control={form.control}
+									name="name"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Name</FormLabel>
 											<FormControl>
-												<SelectTrigger>
-													<SelectValue placeholder="Select a category" />
-												</SelectTrigger>
+												<Input placeholder="MacBook Pro 16" {...field} />
 											</FormControl>
-											<SelectContent>
-												{categories.map((c) => (
-													<SelectItem key={c.id} value={String(c.id)}>
-														{c.name}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="holderLocationId"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Initial Location *</FormLabel>
-										<Select
-											onValueChange={field.onChange}
-											defaultValue={field.value}
-										>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
+									name="assetTag"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Asset Tag</FormLabel>
 											<FormControl>
-												<SelectTrigger>
-													<SelectValue placeholder="Select initial location" />
-												</SelectTrigger>
+												<div className="space-y-2">
+													<Input placeholder="IT-00123" {...field} />
+													<div className="flex gap-2 flex-wrap">
+														<Button
+															type="button"
+															variant="outline"
+															size="sm"
+															onClick={handleGenerateAssetTag}
+															className="flex-1 min-w-0"
+														>
+															<Shuffle className="h-4 w-4 mr-2" />
+															Generate
+														</Button>
+														<Button
+															type="button"
+															variant="outline"
+															size="sm"
+															onClick={() => setShowScanner(true)}
+															className="flex-1 min-w-0"
+														>
+															<QrCode className="h-4 w-4 mr-2" />
+															Scan
+														</Button>
+														<Button
+															type="button"
+															variant="outline"
+															size="sm"
+															onClick={handlePrintBarcode}
+															className="flex-1 min-w-0"
+														>
+															<Printer className="h-4 w-4 mr-2" />
+															Print
+														</Button>
+													</div>
+												</div>
 											</FormControl>
-											<SelectContent>
-												{locations.map((l) => (
-													<SelectItem key={l.id} value={String(l.id)}>
-														{l.name}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="holderOrganizerId"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Assigned Person (Defaults to you)</FormLabel>
-										<Select onValueChange={field.onChange} value={field.value}>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
+									name="serialNumber"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Serial Number</FormLabel>
 											<FormControl>
-												<SelectTrigger>
-													<SelectValue
-														placeholder={`Defaulted to ${getCurrentUserName()}`}
-													/>
-												</SelectTrigger>
+												<Input placeholder="C02X..." {...field} />
 											</FormControl>
-											<SelectContent>
-												<SelectItem value="unassigned">Unassigned</SelectItem>
-												{organizers.map((o) => (
-													<SelectItem key={o.id} value={o.id}>
-														{`${o.firstName} ${o.lastName}`}
-														{o.id === user?.uid && (
-															<Badge
-																variant="secondary"
-																className="ml-2 text-xs"
-															>
-																You
-															</Badge>
-														)}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="notes"
-								render={({ field }) => (
-									<FormItem className="md:col-span-2">
-										<FormLabel>Notes</FormLabel>
-										<FormControl>
-											<Textarea
-												placeholder="Any relevant notes about the item."
-												{...field}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<DialogFooter className="md:col-span-2">
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
+									name="categoryId"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Category</FormLabel>
+											<Select
+												onValueChange={field.onChange}
+												defaultValue={field.value}
+											>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue placeholder="Select a category" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													{categories.map((c) => (
+														<SelectItem key={c.id} value={String(c.id)}>
+															{c.name}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
+									name="holderLocationId"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Initial Location *</FormLabel>
+											<Select
+												onValueChange={field.onChange}
+												defaultValue={field.value}
+											>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue placeholder="Select initial location" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													{locations.map((l) => (
+														<SelectItem key={l.id} value={String(l.id)}>
+															{l.name}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
+									name="holderOrganizerId"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Assigned Person (Defaults to you)</FormLabel>
+											<Select onValueChange={field.onChange} value={field.value}>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue
+															placeholder={`Defaulted to ${getCurrentUserName()}`}
+														/>
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													<SelectItem value="unassigned">Unassigned</SelectItem>
+													{organizers.map((o) => (
+														<SelectItem key={o.id} value={o.id}>
+															{`${o.firstName} ${o.lastName}`}
+															{o.id === user?.uid && (
+																<Badge
+																	variant="secondary"
+																	className="ml-2 text-xs"
+																>
+																	You
+																</Badge>
+															)}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
+									name="notes"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Notes</FormLabel>
+											<FormControl>
+												<Textarea
+													placeholder="Any relevant notes about the item."
+													{...field}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
+							<DialogFooter className="flex-col sm:flex-row gap-2 pt-4">
 								<Button
 									type="button"
 									variant="outline"
+									className="w-full sm:w-auto"
 									onClick={() => onOpenChange(false)}
 								>
 									Cancel
 								</Button>
-								<Button type="submit" disabled={createMutation.isPending}>
+								<Button 
+									type="submit" 
+									disabled={createMutation.isPending}
+									className="w-full sm:w-auto"
+								>
 									{createMutation.isPending ? "Creating..." : "Create"}
 								</Button>
 							</DialogFooter>
@@ -455,7 +467,7 @@ export function ItemFormDialog({
 
 				{/* Scanner Dialog */}
 				<Dialog open={showScanner} onOpenChange={setShowScanner}>
-					<DialogContent className="sm:max-w-[500px]">
+					<DialogContent className="w-[calc(100vw-2rem)] max-w-[500px] max-h-[90vh]">
 						<DialogHeader>
 							<DialogTitle>Scan Asset Tag</DialogTitle>
 							<DialogDescription>
@@ -473,7 +485,7 @@ export function ItemFormDialog({
 									torch: true,
 								}}
 								styles={{
-									container: { width: "100%", height: "300px" },
+									container: { width: "100%", height: "250px" },
 								}}
 							/>
 							<Button
