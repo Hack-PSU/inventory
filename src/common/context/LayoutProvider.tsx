@@ -22,7 +22,7 @@ export default function LayoutProvider({
 		<>
 			<FirebaseProvider>
 				<QueryClientProvider client={queryClient}>
-					<AuthGuard config={{ minimumRole: Role.TEAM }}>{children}</AuthGuard>
+					{children}
 				</QueryClientProvider>
 			</FirebaseProvider>
 		</>
