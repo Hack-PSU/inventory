@@ -26,9 +26,18 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDeleteDialog } from "@/components/inventory/confirm-delete-dialog";
 import { SearchInput } from "@/components/inventory/search-input";
+
+type HolderValue = "all" | "unassigned" | `loc:${string}` | `org:${string}`;
 
 interface ItemTableProps {
 	items: InventoryItemEntity[];
@@ -44,9 +53,12 @@ export function ItemTable({
 	organizers,
 }: ItemTableProps) {
 	const [filter, setFilter] = useState("");
-	const [itemToDelete, setItemToDelete] = useState<InventoryItemEntity | null>(
-		null
-	);
+	const [categoryFilter, setCategoryFilter] = useState<string>("all");
+	const [statusFilter, setStatusFilter] = useState<string>("all");
+	const [holderFilter, setHolderFilter] = useState<HolderValue>("all");
+
+	const [itemToDelete, setItemToDelete] =
+		useState<InventoryItemEntity | null>(null);
 	const deleteMutation = useDeleteItem();
 
 	const categoryMap = useMemo(
@@ -58,16 +70,62 @@ export function ItemTable({
 		[locations]
 	);
 	const organizerMap = useMemo(
-		() =>
-			new Map(organizers.map((o) => [o.id, `${o.firstName} ${o.lastName}`])),
+		() => new Map(organizers.map((o) => [o.id, `${o.firstName} ${o.lastName}`])),
 		[organizers]
 	);
 
-	const filteredItems = items.filter((item) =>
-		(item.name || item.assetTag || "")
-			.toLowerCase()
-			.includes(filter.toLowerCase())
-	);
+	const filteredItems = useMemo(() => {
+		const text = filter.trim().toLowerCase();
+
+		return items.filter((item) => {
+			const matchesText =
+				!text ||
+				(item.name || "").toLowerCase().includes(text) ||
+				(item.assetTag || "").toLowerCase().includes(text);
+
+			// Normalize to string for comparisons
+			const matchesCategory =
+				categoryFilter === "all" || String(item.categoryId) === categoryFilter;
+
+			const matchesStatus =
+				statusFilter === "all" || String(item.status) === statusFilter;
+
+			let matchesHolder = true;
+			if (holderFilter !== "all") {
+				if (holderFilter === "unassigned") {
+					matchesHolder = !item.holderLocationId && !item.holderOrganizerId;
+				} else if (holderFilter.startsWith("loc:")) {
+					matchesHolder =
+						String(item.holderLocationId) === holderFilter.slice(4);
+				} else if (holderFilter.startsWith("org:")) {
+					matchesHolder =
+						String(item.holderOrganizerId) === holderFilter.slice(4);
+				}
+			}
+
+			return matchesText && matchesCategory && matchesStatus && matchesHolder;
+		});
+	}, [items, filter, categoryFilter, statusFilter, holderFilter]);
+
+	const statusOptions = useMemo(() => {
+		const set = new Set<string>();
+		for (const it of items) {
+			if (it.status != null) set.add(String(it.status));
+		}
+		return Array.from(set).sort();
+	}, [items]);
+
+	const holderOptions = useMemo(() => {
+		const locOpts = locations.map((l) => ({
+			label: l.name,
+			value: `loc:${String(l.id)}` as const,
+		}));
+		const orgOpts = organizers.map((o) => ({
+			label: `${o.firstName} ${o.lastName}`,
+			value: `org:${String(o.id)}` as const,
+		}));
+		return { locOpts, orgOpts };
+	}, [locations, organizers]);
 
 	const handleDelete = () => {
 		if (!itemToDelete) return;
@@ -87,13 +145,86 @@ export function ItemTable({
 
 	return (
 		<div className="rounded-lg border">
-			<div className="p-4">
-				<SearchInput
-					value={filter}
-					onChange={(e: any) => setFilter(e.target.value)}
-					placeholder="Filter by name or asset tag..."
-				/>
+			<div className="flex flex-wrap gap-2 p-4 items-center justify-between">
+				{/* Search input on the left */}
+				<div className="w-full max-w-sm">
+					<SearchInput
+						value={filter}
+						onChange={(e: any) => setFilter(e.target.value)}
+						placeholder="Filter by name or asset tag..."
+					/>
+				</div>
+
+				{/* Dropdowns on the right */}
+				<div className="flex flex-row gap-2 items-center">
+					{/* Category */}
+					<Select
+						value={categoryFilter}
+						onValueChange={(v: string) => setCategoryFilter(v)}
+					>
+						<SelectTrigger className="w-[200px]">
+							<SelectValue placeholder="Category" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">All Categories</SelectItem>
+							{categories.map((c) => (
+								<SelectItem key={c.id} value={String(c.id)}>
+									{c.name}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+
+					{/* Status */}
+					<Select
+						value={statusFilter}
+						onValueChange={(v: string) => setStatusFilter(v)}
+					>
+						<SelectTrigger className="w-[180px]">
+							<SelectValue placeholder="Status" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">All Statuses</SelectItem>
+							{statusOptions.map((s) => (
+								<SelectItem key={s} value={s}>
+									{s}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+
+					{/* Holder */}
+					<Select
+						value={holderFilter}
+						onValueChange={(v: HolderValue) => setHolderFilter(v)}
+					>
+						<SelectTrigger className="w-[220px]">
+							<SelectValue placeholder="Holder" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">All Holders</SelectItem>
+							<SelectItem value="unassigned">Unassigned</SelectItem>
+							<div className="px-2 py-1 text-xs font-medium text-muted-foreground">
+								Locations
+							</div>
+							{holderOptions.locOpts.map((o) => (
+								<SelectItem key={o.value} value={o.value}>
+									{o.label}
+								</SelectItem>
+							))}
+							<div className="px-2 py-1 text-xs font-medium text-muted-foreground">
+								Organizers
+							</div>
+							{holderOptions.orgOpts.map((o) => (
+								<SelectItem key={o.value} value={o.value}>
+									{o.label}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
 			</div>
+
 			<Table>
 				<TableHeader>
 					<TableRow>
@@ -150,6 +281,7 @@ export function ItemTable({
 					))}
 				</TableBody>
 			</Table>
+
 			<ConfirmDeleteDialog
 				open={!!itemToDelete}
 				onOpenChange={(open) => !open && setItemToDelete(null)}
