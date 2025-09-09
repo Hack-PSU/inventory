@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { PlusCircle } from "lucide-react";
 
-import { useAllMovements, useAllItems } from "@/common/api/inventory";
+import { useAllMovements, useAllItems, useAllCategories } from "@/common/api/inventory";
 import { useAllLocations } from "@/common/api/location";
 import { useAllOrganizers } from "@/common/api/organizer";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ export default function MovementsPage() {
 
 	const { data: movements, isLoading: isLoadingMovements } = useAllMovements();
 	const { data: items, isLoading: isLoadingItems } = useAllItems();
+	const { data: categories, isLoading: isLoadingCategories } = useAllCategories();
 	const { data: locations, isLoading: isLoadingLocations } = useAllLocations();
 	const { data: organizers, isLoading: isLoadingOrganizers } =
 		useAllOrganizers();
@@ -23,6 +24,7 @@ export default function MovementsPage() {
 	const isLoading =
 		isLoadingMovements ||
 		isLoadingItems ||
+		isLoadingCategories ||
 		isLoadingLocations ||
 		isLoadingOrganizers;
 
@@ -58,6 +60,7 @@ export default function MovementsPage() {
 				<MovementTable
 					movements={movements || []}
 					items={items || []}
+					categories={categories || []}
 					locations={locations || []}
 					organizers={organizers || []}
 				/>
