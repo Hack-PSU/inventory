@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import type {
 	InventoryMovementEntity,
 	InventoryItemEntity,
+	InventoryCategoryEntity,
 } from "@/common/api/inventory";
 import type { LocationEntity } from "@/common/api/location";
 import type { OrganizerEntity } from "@/common/api/organizer";
@@ -33,6 +34,7 @@ import { SearchInput } from "@/components/inventory/search-input";
 interface MovementTableProps {
 	movements: InventoryMovementEntity[];
 	items: InventoryItemEntity[];
+	categories: InventoryCategoryEntity[];
 	locations: LocationEntity[];
 	organizers: OrganizerEntity[];
 }
@@ -40,6 +42,7 @@ interface MovementTableProps {
 export function MovementTable({
 	movements,
 	items,
+	categories,
 	locations,
 	organizers,
 }: MovementTableProps) {
@@ -52,6 +55,10 @@ export function MovementTable({
 		() =>
 			new Map(items.map((i) => [i.id, i.name || i.assetTag || "Unknown Item"])),
 		[items]
+	);
+	const categoryMap = useMemo(
+		() => new Map(categories.map((c) => [c.id, c.name])),
+		[categories]
 	);
 	const locationMap = useMemo(
 		() => new Map(locations.map((l) => [l.id, l.name])),
@@ -153,6 +160,7 @@ export function MovementTable({
 					<TableHeader>
 						<TableRow>
 							<TableHead className="whitespace-nowrap">Item</TableHead>
+							<TableHead className="whitespace-nowrap min-w-[120px]">Category</TableHead>
 							<TableHead className="whitespace-nowrap">Reason</TableHead>
 							<TableHead className="min-w-[120px] sm:min-w-[150px] whitespace-nowrap">
 								From
@@ -167,20 +175,29 @@ export function MovementTable({
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{filteredMovements.map((movement) => (
-							<TableRow key={movement.id}>
-								<TableCell className="font-medium">
-									<div className="min-w-0">
-										<div className="truncate text-sm sm:text-base">
-											{itemMap.get(movement.itemId)}
+						{filteredMovements.map((movement) => {
+							const item = items.find(i => i.id === movement.itemId);
+							const categoryName = item ? categoryMap.get(item.categoryId) : "Unknown Category";
+							
+							return (
+								<TableRow key={movement.id}>
+									<TableCell className="font-medium">
+										<div className="min-w-0">
+											<div className="truncate text-sm sm:text-base">
+												{itemMap.get(movement.itemId)}
+											</div>
 										</div>
-									</div>
-								</TableCell>
-								<TableCell>
-									<Badge variant="secondary" className="text-xs sm:text-sm">
-										{movement.reason}
-									</Badge>
-								</TableCell>
+									</TableCell>
+									<TableCell className="min-w-[120px]">
+										<Badge variant="outline" className="text-xs sm:text-sm">
+											{categoryName || "Unknown Category"}
+										</Badge>
+									</TableCell>
+									<TableCell>
+										<Badge variant="secondary" className="text-xs sm:text-sm">
+											{movement.reason}
+										</Badge>
+									</TableCell>
 								<TableCell className="min-w-0">
 									<div className="text-xs sm:text-sm">
 										{getHolderDisplay(
@@ -222,7 +239,8 @@ export function MovementTable({
 									</div>
 								</TableCell>
 							</TableRow>
-						))}
+							);
+						})}
 					</TableBody>
 				</Table>
 			</div>
