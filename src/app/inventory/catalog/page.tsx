@@ -255,9 +255,6 @@ export default function CatalogPage() {
 				<div className="text-center py-12">
 					<Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
 					<h3 className="text-lg font-semibold mb-2">No categories found</h3>
-					<p className="text-muted-foreground mb-4">
-						Try adjusting your search or filter criteria to find what you're looking for.
-					</p>
 					<Button
 						variant="outline"
 						onClick={() => {
