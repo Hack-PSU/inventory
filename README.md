@@ -133,7 +133,7 @@ Set the following environment variables:
 - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
 - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
 - `NEXT_PUBLIC_FIREBASE_APP_ID`
-- `NEXT_PUBLIC_BASE_URL_V3`
+- `NEXT_PUBLIC_BASE_URL`
 
 4. Start the development server:
 
