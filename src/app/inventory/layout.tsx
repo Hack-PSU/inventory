@@ -23,9 +23,11 @@ export default function InventoryLayout({
       </header>
 
 			{/* Main Content */}
-			<main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24">
+			<main className="flex-1 p-4 sm:p-6 lg:p-8">
 				{children}
 				<Toaster richColors />
+				{/* Spacer to prevent content from flowing under bottom navbar */}
+				<div className="h-24" /> {/* This matches the pb-24 we had before */}
 			</main>
 
       {/* Bottom Navigation */}
