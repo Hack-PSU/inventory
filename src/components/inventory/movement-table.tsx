@@ -30,6 +30,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDeleteDialog } from "@/components/inventory/confirm-delete-dialog";
 import { SearchInput } from "@/components/inventory/search-input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { MovementReason } from "@/common/api/inventory/entity";
+
+type HolderValue = "all" | "unassigned" | `loc:${string}` | `org:${string}`;
 
 interface MovementTableProps {
 	movements: InventoryMovementEntity[];
@@ -47,6 +57,9 @@ export function MovementTable({
 	organizers,
 }: MovementTableProps) {
 	const [filter, setFilter] = useState("");
+	const [categoryFilter, setCategoryFilter] = useState<string>("all");
+	const [reasonFilter, setReasonFilter] = useState<string>("all");
+	const [holderFilter, setHolderFilter] = useState<HolderValue>("all");
 	const [itemToDelete, setItemToDelete] =
 		useState<InventoryMovementEntity | null>(null);
 	const deleteMutation = useDeleteMovement();
@@ -126,11 +139,68 @@ export function MovementTable({
 		}
 	};
 
-	const filteredMovements = movements.filter((movement) =>
-		(itemMap.get(movement.itemId) || "")
-			.toLowerCase()
-			.includes(filter.toLowerCase())
-	);
+	const reasonOptions = useMemo(() => {
+		return Object.values(MovementReason);
+	}, []);
+
+	const holderOptions = useMemo(() => {
+		const locOpts = locations.map((l) => ({
+			label: l.name,
+			value: `loc:${String(l.id)}` as const,
+		}));
+		const orgOpts = organizers.map((o) => ({
+			label: `${o.firstName} ${o.lastName}`,
+			value: `org:${String(o.id)}` as const,
+		}));
+		return { locOpts, orgOpts };
+	}, [locations, organizers]);
+
+	const filteredMovements = useMemo(() => {
+		const text = filter.trim().toLowerCase();
+
+		return movements.filter((movement) => {
+			// Text search on item name/tag
+			const matchesText =
+				!text ||
+				(itemMap.get(movement.itemId) || "")
+					.toLowerCase()
+					.includes(text);
+
+			// Category filter
+			const item = items.find(i => i.id === movement.itemId);
+			const matchesCategory =
+				categoryFilter === "all" ||
+				(item && String(item.categoryId) === categoryFilter);
+
+			// Reason filter
+			const matchesReason =
+				reasonFilter === "all" || movement.reason === reasonFilter;
+
+			// Holder filter
+			let matchesHolder = true;
+			if (holderFilter !== "all") {
+				if (holderFilter === "unassigned") {
+					matchesHolder = 
+						(!movement.fromLocationId && !movement.fromOrganizerId) ||
+						(!movement.toLocationId && !movement.toOrganizerId);
+				} else if (holderFilter.startsWith("loc:")) {
+					// For locations, check exact location match
+					const locationId = holderFilter.slice(4);
+					matchesHolder =
+						String(movement.fromLocationId) === locationId ||
+						String(movement.toLocationId) === locationId;
+				} else if (holderFilter.startsWith("org:")) {
+					// For people, check if they appear in either from or to, regardless of location
+					const organizerId = holderFilter.slice(4);
+					const fromMatch = String(movement.fromOrganizerId) === organizerId;
+					const toMatch = String(movement.toOrganizerId) === organizerId;
+					matchesHolder = fromMatch || toMatch;
+				}
+			}
+
+			return matchesText && matchesCategory && matchesReason && matchesHolder;
+		});
+	}, [movements, items, filter, categoryFilter, reasonFilter, holderFilter, itemMap]);
 
 	const handleDelete = () => {
 		if (!itemToDelete) return;
@@ -148,12 +218,84 @@ export function MovementTable({
 
 	return (
 		<div className="rounded-lg border">
-			<div className="p-3 sm:p-4">
-				<SearchInput
-					value={filter}
-					onChange={(e: any) => setFilter(e.target.value)}
-					placeholder="Filter by item name/tag..."
-				/>
+			<div className="flex flex-wrap gap-2 p-3 sm:p-4 items-center justify-between">
+				{/* Search input on the left */}
+				<div className="w-full max-w-sm">
+					<SearchInput
+						value={filter}
+						onChange={(e: any) => setFilter(e.target.value)}
+						placeholder="Filter by item name/tag..."
+					/>
+				</div>
+
+				{/* Dropdowns on the right */}
+				<div className="flex flex-row gap-2 items-center">
+					{/* Category */}
+					<Select
+						value={categoryFilter}
+						onValueChange={(v: string) => setCategoryFilter(v)}
+					>
+						<SelectTrigger className="w-[200px]">
+							<SelectValue placeholder="Category" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">All Categories</SelectItem>
+							{categories.map((c) => (
+								<SelectItem key={c.id} value={String(c.id)}>
+									{c.name}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+
+					{/* Reason */}
+					<Select
+						value={reasonFilter}
+						onValueChange={(v: string) => setReasonFilter(v)}
+					>
+						<SelectTrigger className="w-[180px]">
+							<SelectValue placeholder="Reason" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">All Reasons</SelectItem>
+							{reasonOptions.map((reason) => (
+								<SelectItem key={reason} value={reason}>
+									{reason}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+
+					{/* Holder */}
+					<Select
+						value={holderFilter}
+						onValueChange={(v: HolderValue) => setHolderFilter(v)}
+					>
+						<SelectTrigger className="w-[220px]">
+							<SelectValue placeholder="Holder" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">All Holders</SelectItem>
+							<SelectItem value="unassigned">Unassigned</SelectItem>
+							<div className="px-2 py-1 text-xs font-medium text-muted-foreground">
+								Locations
+							</div>
+							{holderOptions.locOpts.map((o) => (
+								<SelectItem key={o.value} value={o.value}>
+									{o.label}
+								</SelectItem>
+							))}
+							<div className="px-2 py-1 text-xs font-medium text-muted-foreground">
+								Organizers
+							</div>
+							{holderOptions.orgOpts.map((o) => (
+								<SelectItem key={o.value} value={o.value}>
+									{o.label}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
 			</div>
 			<div className="overflow-x-auto">
 				<Table>
