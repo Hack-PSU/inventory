@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { MoreHorizontal, Trash2 } from "lucide-react";
+import { MoreHorizontal, Trash2, SquarePen } from "lucide-react";
 import { toast } from "sonner";
 
 import type {
@@ -60,6 +60,8 @@ export function ItemTable({
 	const [itemToDelete, setItemToDelete] =
 		useState<InventoryItemEntity | null>(null);
 	const deleteMutation = useDeleteItem();
+
+	const [itemToEdit, setItemToEdit] = useState<InventoryItemEntity | null>(null);
 
 	const categoryMap = useMemo(
 		() => new Map(categories.map((c) => [c.id, c.name])),
@@ -267,6 +269,13 @@ export function ItemTable({
 										</DropdownMenuTrigger>
 										<DropdownMenuContent align="end">
 											<DropdownMenuItem
+												className="text-blue-500"
+												onClick={() => setItemToDelete(item)}
+											>
+												<SquarePen className="mr-2 h-4 w-4" />
+												Edit
+											</DropdownMenuItem>
+											<DropdownMenuItem
 												className="text-red-500"
 												onClick={() => setItemToDelete(item)}
 											>
@@ -289,6 +298,8 @@ export function ItemTable({
 				itemName={itemToDelete?.name || itemToDelete?.assetTag || ""}
 				isPending={deleteMutation.isPending}
 			/>
+
+			{/* Dialog for editing item */}
 		</div>
 	);
 }
