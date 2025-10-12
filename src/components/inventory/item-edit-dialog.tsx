@@ -219,7 +219,7 @@ export function ItemEditDialog({
                     <DialogHeader>
                         <DialogTitle>Edit Item</DialogTitle>
                         <DialogDescription>
-                            Edit an item's details below. Fields highlighted in blue represents <strong><em>edited values.</em></strong>
+                            Edit an item&lpos;s details below. Fields highlighted in blue represents <strong><em>edited values.</em></strong>
                         </DialogDescription>
                     </DialogHeader>
                     <Form {...form}>
