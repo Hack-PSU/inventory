@@ -10,6 +10,7 @@ import {
 	getAllMovements,
 	createMovement,
 	deleteMovement,
+	updateItem,
 } from "./provider";
 import {
 	InventoryCategoryCreateEntity,
@@ -18,6 +19,7 @@ import {
 	InventoryCategoryEntity,
 	InventoryItemEntity,
 	InventoryMovementEntity,
+	InventoryItemUpdateEntity,
 } from "./entity";
 
 /* -------- Query Keys -------- */
@@ -67,6 +69,16 @@ export function useCreateItem() {
 	const qc = useQueryClient();
 	return useMutation({
 		mutationFn: (data: InventoryItemCreateEntity) => createItem(data),
+		onSuccess: () => {
+			qc.invalidateQueries({ queryKey: inventoryQueryKeys.items });
+		},
+	});
+}
+
+export function useUpdateItem() {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: ({ id, data }: { id: string; data: InventoryItemUpdateEntity }) => updateItem(id, data),
 		onSuccess: () => {
 			qc.invalidateQueries({ queryKey: inventoryQueryKeys.items });
 		},

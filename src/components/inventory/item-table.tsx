@@ -36,6 +36,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDeleteDialog } from "@/components/inventory/confirm-delete-dialog";
 import { SearchInput } from "@/components/inventory/search-input";
+import { ItemEditDialog } from "./item-edit-dialog";
 
 type HolderValue = "all" | "unassigned" | `loc:${string}` | `org:${string}`;
 
@@ -270,7 +271,7 @@ export function ItemTable({
 										<DropdownMenuContent align="end">
 											<DropdownMenuItem
 												className="text-blue-500"
-												onClick={() => setItemToDelete(item)}
+												onClick={() => setItemToEdit(item)}
 											>
 												<SquarePen className="mr-2 h-4 w-4" />
 												Edit
@@ -300,6 +301,14 @@ export function ItemTable({
 			/>
 
 			{/* Dialog for editing item */}
+
+			{itemToEdit && 
+				<ItemEditDialog
+					open={!!itemToEdit}
+					item={itemToEdit}
+					onOpenChange={(open) => !open && setItemToEdit(null)}
+				/>
+			}
 		</div>
 	);
 }
