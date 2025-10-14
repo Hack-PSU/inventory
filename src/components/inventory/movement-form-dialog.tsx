@@ -95,6 +95,15 @@ export function MovementFormDialog({
 	const [showScanner, setShowScanner] = useState(false);
 	const [selectedCameraId, setSelectedCameraId] = useState<string>("");
 
+	const [fromPersonOpen, setFromPersonOpen] = useState(false);
+	const [fromPersonQuery, setFromPersonQuery] = useState("");
+	
+
+	const [toPersonOpen, setToPersonOpen] = useState(false);
+	const [toPersonQuery, setToPersonQuery] = useState("");
+	const [toPersonPopoverOpen, setToPersonPopoverOpen] = useState(false);
+
+
 	const form = useForm<MovementFormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -366,14 +375,11 @@ export function MovementFormDialog({
 									control={form.control}
 									name="fromOrganizerId"
 									render={({ field }) => {
-										const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-										const [query, setQuery] = useState("");
-
 										const filteredOrganizers = organizers.filter((o) => {
 											const fullName = `${o.firstName} ${o.lastName}`.toLowerCase();
 											return (
-												fullName.includes(query.toLowerCase()) ||
-												o.email?.toLowerCase().includes(query.toLowerCase())
+												fullName.includes(fromPersonQuery.toLowerCase()) ||
+												o.email?.toLowerCase().includes(fromPersonQuery.toLowerCase())
 											);
 										});
 
@@ -383,13 +389,13 @@ export function MovementFormDialog({
 										return (
 											<FormItem>
 												<FormLabel className="text-sm">From Person</FormLabel>
-												<Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+												<Popover open={fromPersonOpen} onOpenChange={setFromPersonOpen}>
 													<PopoverTrigger asChild>
 														<Button
 															variant="outline"
 															role="combobox"
 															className="w-full justify-between bg-muted"
-															onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+															onClick={() => setFromPersonOpen(!fromPersonOpen)}
 														>
 															{selectedOrganizer ? (
 																<span>
@@ -416,21 +422,21 @@ export function MovementFormDialog({
 														<Command shouldFilter={false}>
 															<CommandInput
 																placeholder="Search for a person..."
-																value={query}
-																onValueChange={setQuery}
+																value={fromPersonQuery}
+																onValueChange={setFromPersonQuery}
 																className="border-none focus:ring-0"
 															/>
 															<CommandList className="max-h-[200px]">
 																{filteredOrganizers.length === 0 ? (
 																	<CommandEmpty>
-																		{query ? "No matches found." : "Start typing to search."}
+																		{fromPersonQuery ? "No matches found." : "Start typing to search."}
 																	</CommandEmpty>
 																) : (
 																	<>
 																		<CommandItem
 																			onSelect={() => {
 																				field.onChange(undefined);
-																				setIsPopoverOpen(false);
+																				setFromPersonOpen(false);
 																			}}
 																		>
 																			None
@@ -440,7 +446,7 @@ export function MovementFormDialog({
 																				key={o.id}
 																				onSelect={() => {
 																					field.onChange(o.id);
-																					setIsPopoverOpen(false);
+																					setFromPersonOpen(false);
 																				}}
 																			>
 																				<div className="flex flex-col">
@@ -474,6 +480,7 @@ export function MovementFormDialog({
 										);
 									}}
 								/>
+
 							</div>
 
 							{/* TO Section */}
@@ -513,114 +520,116 @@ export function MovementFormDialog({
 									control={form.control}
 									name="toOrganizerId"
 									render={({ field }) => {
-										const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-										const [query, setQuery] = useState("");
-
 										const filteredOrganizers = organizers.filter((o) => {
-											const fullName = `${o.firstName} ${o.lastName}`.toLowerCase();
-											return (
-												fullName.includes(query.toLowerCase()) ||
-												o.email?.toLowerCase().includes(query.toLowerCase())
-											);
+										const fullName = `${o.firstName} ${o.lastName}`.toLowerCase();
+										return (
+											fullName.includes(toPersonQuery.toLowerCase()) ||
+											o.email?.toLowerCase().includes(toPersonQuery.toLowerCase())
+										);
 										});
 
 										const selectedOrganizer =
-											organizers.find((o) => o.id === field.value) || null;
+										organizers.find((o) => o.id === field.value) || null;
 
 										return (
-											<FormItem>
-												<FormLabel className="text-sm">To Person</FormLabel>
-												<Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-													<PopoverTrigger asChild>
-														<Button
-															variant="outline"
-															role="combobox"
-															className="w-full justify-between"
-															onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+										<FormItem>
+											<FormLabel className="text-sm">To Person</FormLabel>
+											<Popover
+											open={toPersonPopoverOpen}
+											onOpenChange={setToPersonPopoverOpen}
+											>
+											<PopoverTrigger asChild>
+												<Button
+												variant="outline"
+												role="combobox"
+												className="w-full justify-between"
+												onClick={() => setToPersonPopoverOpen(!toPersonPopoverOpen)}
+												>
+												{selectedOrganizer ? (
+													<span>
+													{selectedOrganizer.firstName} {selectedOrganizer.lastName}
+													{selectedOrganizer.id === user?.uid && (
+														<Badge variant="secondary" className="ml-2 text-xs">
+														You
+														</Badge>
+													)}
+													</span>
+												) : (
+													<span className="text-muted-foreground">
+													{`Defaulted to ${getCurrentUserName()}`}
+													</span>
+												)}
+												</Button>
+											</PopoverTrigger>
+
+											<PopoverContent
+												className="w-[var(--radix-popover-trigger-width)] p-0"
+												side="bottom"
+												align="start"
+											>
+												<Command shouldFilter={false}>
+												<CommandInput
+													placeholder="Search for a person..."
+													value={toPersonQuery}
+													onValueChange={setToPersonQuery}
+													className="border-none focus:ring-0"
+												/>
+												<CommandList className="max-h-[200px]">
+													{filteredOrganizers.length === 0 ? (
+													<CommandEmpty>
+														{toPersonQuery
+														? "No matches found."
+														: "Start typing to search."}
+													</CommandEmpty>
+													) : (
+													<>
+														<CommandItem
+														onSelect={() => {
+															field.onChange("unassigned");
+															setToPersonPopoverOpen(false);
+														}}
 														>
-															{selectedOrganizer ? (
-																<span>
-																	{selectedOrganizer.firstName} {selectedOrganizer.lastName}
-																	{selectedOrganizer.id === user?.uid && (
-																		<Badge variant="secondary" className="ml-2 text-xs">
-																			You
-																		</Badge>
-																	)}
-																</span>
-															) : (
-																<span className="text-muted-foreground">
-																	{`Defaulted to ${getCurrentUserName()}`}
+														Unassigned
+														</CommandItem>
+														{filteredOrganizers.map((o) => (
+														<CommandItem
+															key={o.id}
+															onSelect={() => {
+															field.onChange(o.id);
+															setToPersonPopoverOpen(false);
+															}}
+														>
+															<div className="flex flex-col">
+															<span className="font-medium">
+																{o.firstName} {o.lastName}
+																{o.id === user?.uid && (
+																<Badge
+																	variant="secondary"
+																	className="ml-2 text-xs"
+																>
+																	You
+																</Badge>
+																)}
+															</span>
+															{o.email && (
+																<span className="text-xs text-muted-foreground">
+																{o.email}
 																</span>
 															)}
-														</Button>
-													</PopoverTrigger>
-
-													<PopoverContent
-														className="w-[var(--radix-popover-trigger-width)] p-0"
-														side="bottom"
-														align="start"
-													>
-														<Command shouldFilter={false}>
-															<CommandInput
-																placeholder="Search for a person..."
-																value={query}
-																onValueChange={setQuery}
-																className="border-none focus:ring-0"
-															/>
-															<CommandList className="max-h-[200px]">
-																{filteredOrganizers.length === 0 ? (
-																	<CommandEmpty>
-																		{query ? "No matches found." : "Start typing to search."}
-																	</CommandEmpty>
-																) : (
-																	<>
-																		<CommandItem
-																			onSelect={() => {
-																				field.onChange("unassigned");
-																				setIsPopoverOpen(false);
-																			}}
-																		>
-																			Unassigned
-																		</CommandItem>
-																		{filteredOrganizers.map((o) => (
-																			<CommandItem
-																				key={o.id}
-																				onSelect={() => {
-																					field.onChange(o.id);
-																					setIsPopoverOpen(false);
-																				}}
-																			>
-																				<div className="flex flex-col">
-																					<span className="font-medium">
-																						{o.firstName} {o.lastName}
-																						{o.id === user?.uid && (
-																							<Badge
-																								variant="secondary"
-																								className="ml-2 text-xs"
-																							>
-																								You
-																							</Badge>
-																						)}
-																					</span>
-																					{o.email && (
-																						<span className="text-xs text-muted-foreground">
-																							{o.email}
-																						</span>
-																					)}
-																				</div>
-																			</CommandItem>
-																		))}
-																	</>
-																)}
-															</CommandList>
-														</Command>
-													</PopoverContent>
-												</Popover>
-												<FormMessage />
-											</FormItem>
+															</div>
+														</CommandItem>
+														))}
+													</>
+													)}
+												</CommandList>
+												</Command>
+											</PopoverContent>
+											</Popover>
+											<FormMessage />
+										</FormItem>
 										);
 									}}
-								/>
+									/>
 							</div>
 						</div>
 
