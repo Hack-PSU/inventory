@@ -86,9 +86,9 @@ export function BulkMoveDialog({
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Move {selectedItemIds.length} Items</DialogTitle>
-                    <DialogDescription>
-                        Select a new location for the selected items. This will create a new "Transfer" movement record for each item.
-                    </DialogDescription>
+                        <DialogDescription>
+                            Select a new location for the selected items. This will create a new &quot;Transfer&quot; movement record for each item.
+                        </DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
                     <Select onValueChange={(value) => setDestinationId(parseInt(value, 10))}>
