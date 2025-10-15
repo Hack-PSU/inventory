@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { MoreHorizontal, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-
 import type {
 	InventoryItemEntity,
 	InventoryCategoryEntity,
@@ -12,6 +11,7 @@ import type { LocationEntity } from "@/common/api/location";
 import type { OrganizerEntity } from "@/common/api/organizer";
 import { useDeleteItem } from "@/common/api/inventory";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -44,6 +44,8 @@ interface ItemTableProps {
 	categories: InventoryCategoryEntity[];
 	locations: LocationEntity[];
 	organizers: OrganizerEntity[];
+	selectedItemIds: string[]; // needed for checkbox
+    onSelectionChange: (ids: string[]) => void; 
 }
 
 export function ItemTable({
@@ -51,6 +53,8 @@ export function ItemTable({
 	categories,
 	locations,
 	organizers,
+	selectedItemIds,
+    onSelectionChange,
 }: ItemTableProps) {
 	const [filter, setFilter] = useState("");
 	const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -107,6 +111,27 @@ export function ItemTable({
 		});
 	}, [items, filter, categoryFilter, statusFilter, holderFilter]);
 
+
+    useEffect(() => {
+        onSelectionChange([]);
+    }, [filter, categoryFilter, statusFilter, holderFilter]);
+
+    const handleSelectAll = (checked: boolean) => {
+        if (checked) {
+            onSelectionChange(filteredItems.map((item) => item.id));
+        } else {
+            onSelectionChange([]);
+        }
+    };
+
+    const handleSelectItem = (id: string, checked: boolean) => {
+        if (checked) {
+            onSelectionChange([...selectedItemIds, id]);
+        } else {
+            onSelectionChange(selectedItemIds.filter((itemId) => itemId !== id));
+        }
+    };
+
 	const statusOptions = useMemo(() => {
 		const set = new Set<string>();
 		for (const it of items) {
@@ -115,6 +140,7 @@ export function ItemTable({
 		return Array.from(set).sort();
 	}, [items]);
 
+	
 	const holderOptions = useMemo(() => {
 		const locOpts = locations.map((l) => ({
 			label: l.name,
@@ -142,6 +168,8 @@ export function ItemTable({
 			},
 		});
 	};
+
+	const isAllSelected = filteredItems.length > 0 && selectedItemIds.length === filteredItems.length;
 
 	return (
 		<div className="rounded-lg border">
@@ -228,6 +256,13 @@ export function ItemTable({
 			<Table>
 				<TableHeader>
 					<TableRow>
+                        <TableHead className="w-[50px]">
+                            <Checkbox
+                                checked={isAllSelected}
+                                onCheckedChange={handleSelectAll}
+                                aria-label="Select all"
+                            />
+                        </TableHead>
 						<TableHead>Name</TableHead>
 						<TableHead>Asset Tag</TableHead>
 						<TableHead>Category</TableHead>
@@ -239,6 +274,14 @@ export function ItemTable({
 				<TableBody>
 					{filteredItems.map((item) => (
 						<TableRow key={item.id}>
+
+                            <TableCell>
+                                <Checkbox
+                                    checked={selectedItemIds.includes(item.id)}
+                                    onCheckedChange={(checked) => handleSelectItem(item.id, !!checked)}
+                                    aria-label={`Select item ${item.name}`}
+                                />
+                            </TableCell>
 							<TableCell className="font-medium">
 								{item.name || "N/A"}
 							</TableCell>
