@@ -7,6 +7,7 @@ import {
 	InventoryItemCreateEntity,
 	InventoryMovementEntity,
 	InventoryMovementCreateEntity,
+	InventoryItemUpdateEntity,
 } from "./entity";
 
 /* -------- Categories -------- */
@@ -41,6 +42,16 @@ export async function createItem(
 		method: "POST",
 		body: JSON.stringify(data),
 	});
+}
+
+export async function updateItem(
+	id: string,
+	data: InventoryItemUpdateEntity
+): Promise<InventoryItemEntity> {
+	return apiFetch<InventoryItemEntity>(`/inventory/items/${id}`, {
+		method: "PATCH",
+		body: JSON.stringify(data),
+	})
 }
 
 export async function deleteItem(id: string): Promise<InventoryItemEntity> {

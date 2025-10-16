@@ -49,6 +49,12 @@ export type InventoryItemCreateEntity = Omit<
 	status?: InventoryItemStatus;
 };
 
+// Only update the name, asset tag, serial number, and note
+export type InventoryItemUpdateEntity = Omit<
+	InventoryItemEntity,
+	"id" | "categoryId" | "holderLocationId" | "holderOrganizerId" | "createdAt" | "updatedAt" | "status"
+>;
+
 /** ----- Movements ----- */
 export interface InventoryMovementEntity {
 	id: string; // uuid
