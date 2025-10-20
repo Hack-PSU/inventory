@@ -184,9 +184,9 @@ export default function CatalogPage() {
 
 			{/* Filter Controls */}
 			<div className="rounded-lg border">
-				<div className="flex flex-wrap gap-2 p-4 items-center justify-between">
+				<div className="flex flex-col sm:flex-row gap-3 p-3 sm:p-4 sm:items-center sm:justify-between">
 					{/* Search input */}
-					<div className="w-full max-w-sm">
+					<div className="w-full sm:max-w-sm">
 						<SearchInput
 							value={searchFilter}
 							onChange={(e: any) => setSearchFilter(e.target.value)}
@@ -194,14 +194,14 @@ export default function CatalogPage() {
 						/>
 					</div>
 
-					{/* Dropdowns */}
-					<div className="flex flex-row gap-2 items-center">
+					{/* Filter dropdowns */}
+					<div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
 						{/* Status Filter */}
 						<Select
 							value={statusFilter}
 							onValueChange={setStatusFilter}
 						>
-							<SelectTrigger className="w-[140px]">
+							<SelectTrigger className="w-full sm:w-[140px]">
 								<SelectValue placeholder="Status" />
 							</SelectTrigger>
 							<SelectContent>
@@ -219,7 +219,7 @@ export default function CatalogPage() {
 							value={locationFilter}
 							onValueChange={setLocationFilter}
 						>
-							<SelectTrigger className="w-[160px]">
+							<SelectTrigger className="w-full sm:w-[160px]">
 								<SelectValue placeholder="Location" />
 							</SelectTrigger>
 							<SelectContent>
@@ -238,7 +238,7 @@ export default function CatalogPage() {
 							value={peopleFilter}
 							onValueChange={setPeopleFilter}
 						>
-							<SelectTrigger className="w-[140px]">
+							<SelectTrigger className="w-full sm:w-[140px]">
 								<SelectValue placeholder="People" />
 							</SelectTrigger>
 							<SelectContent>
