@@ -176,9 +176,9 @@ export function ItemTable({
 
 	return (
 		<div className="rounded-lg border">
-			<div className="flex flex-wrap gap-2 p-4 items-center justify-between">
-				{/* Search input on the left */}
-				<div className="w-full max-w-sm">
+			<div className="flex flex-col sm:flex-row gap-3 p-3 sm:p-4 sm:items-center sm:justify-between">
+				{/* Search input */}
+				<div className="w-full sm:max-w-sm">
 					<SearchInput
 						value={filter}
 						onChange={(e: any) => setFilter(e.target.value)}
@@ -186,14 +186,14 @@ export function ItemTable({
 					/>
 				</div>
 
-				{/* Dropdowns on the right */}
-				<div className="flex flex-row gap-2 items-center">
+				{/* Filter dropdowns */}
+				<div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
 					{/* Category */}
 					<Select
 						value={categoryFilter}
 						onValueChange={(v: string) => setCategoryFilter(v)}
 					>
-						<SelectTrigger className="w-[200px]">
+						<SelectTrigger className="w-full sm:w-[200px]">
 							<SelectValue placeholder="Category" />
 						</SelectTrigger>
 						<SelectContent>
@@ -211,7 +211,7 @@ export function ItemTable({
 						value={statusFilter}
 						onValueChange={(v: string) => setStatusFilter(v)}
 					>
-						<SelectTrigger className="w-[180px]">
+						<SelectTrigger className="w-full sm:w-[180px]">
 							<SelectValue placeholder="Status" />
 						</SelectTrigger>
 						<SelectContent>
@@ -229,7 +229,7 @@ export function ItemTable({
 						value={holderFilter}
 						onValueChange={(v: HolderValue) => setHolderFilter(v)}
 					>
-						<SelectTrigger className="w-[220px]">
+						<SelectTrigger className="w-full sm:w-[220px]">
 							<SelectValue placeholder="Holder" />
 						</SelectTrigger>
 						<SelectContent>
