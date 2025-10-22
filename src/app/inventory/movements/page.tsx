@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { PlusCircle } from "lucide-react";
-
+import { PlusCircle, Package } from "lucide-react";
+import { NewBulkMoveDialog } from "@/components/inventory/NewBulkMoveDialog";
 import { useAllMovements, useAllItems, useAllCategories } from "@/common/api/inventory";
 import { useAllLocations } from "@/common/api/location";
 import { useAllOrganizers } from "@/common/api/organizer";
@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function MovementsPage() {
 	const [isCreateOpen, setCreateOpen] = useState(false);
+	const [isBulkMoveOpen, setBulkMoveOpen] = useState(false);
 
 	const { data: movements, isLoading: isLoadingMovements } = useAllMovements();
 	const { data: items, isLoading: isLoadingItems } = useAllItems();
@@ -39,14 +40,24 @@ export default function MovementsPage() {
 						Track your inventory movements.
 					</p>
 				</div>
-				<Button
-					onClick={() => setCreateOpen(true)}
-					disabled={isLoading}
-					className="w-full sm:w-auto"
-				>
-					<PlusCircle className="mr-2 h-4 w-4" />
-					<span className="sm:inline">Create Movement</span>
-				</Button>
+				<div className="flex flex-col gap-2 sm:flex-row">
+					<Button
+						onClick={() => setBulkMoveOpen(true)}
+						disabled={isLoading}
+						className="w-full sm:w-auto"
+					>
+						<Package className="mr-2 h-4 w-4" />
+						<span className="sm:inline">Bulk Move</span>
+					</Button>
+					<Button
+						onClick={() => setCreateOpen(true)}
+						disabled={isLoading}
+						className="w-full sm:w-auto"
+					>
+						<PlusCircle className="mr-2 h-4 w-4" />
+						<span className="sm:inline">Create Movement</span>
+					</Button>
+				</div>
 			</header>
 
 			{isLoading ? (
@@ -72,6 +83,13 @@ export default function MovementsPage() {
 				items={items || []}
 				locations={locations || []}
 				organizers={organizers || []}
+			/>
+			<NewBulkMoveDialog
+				open={isBulkMoveOpen}
+				onOpenChange={setBulkMoveOpen}
+				items={items || []}
+				locations={locations || []}
+				onSuccess={() => {}}
 			/>
 		</div>
 	);
