@@ -3634,9 +3634,9 @@
   integrity sha512-MYsBzfPki4gthY5HnYN7jgInhAZ7Ac1cYDoRWFomwGHWEX7odTEzbtg9kf/QSo7XEsEAqlQugA6gJ2WS2DEa3g==
 
 "@yudiel/react-qr-scanner@^2.3.1":
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/@yudiel/react-qr-scanner/-/react-qr-scanner-2.4.0.tgz#2ec4b32766b10b3fb7d4aeadf3b9acd089051275"
-  integrity sha512-Bx8Xnz42cAfeKs1Em1oh8ESvnPbvhqXo/Us1jgaJr0U/dmnIvozLAfH0qlompczETOJQpZbIfRWkdvR+Z9q8Sw==
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/@yudiel/react-qr-scanner/-/react-qr-scanner-2.4.1.tgz#ae3e302896e5a4d09f3c4d2fe12b8cfb8b6c0086"
+  integrity sha512-O5lkVrfUR7VixJLvuIxnzANi/O+KlObPnfkJk8btGeFY+Y7pC4kv8iDQhs/Cw9KiiyD7VSJDcHUHVKsYR8/xmw==
   dependencies:
     barcode-detector "3.0.6"
     webrtc-adapter "9.0.3"
