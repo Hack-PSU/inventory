@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
 	name: z.string().min(1, "Name is required"),
+	capacity: z.number(),
 });
 
 type LocationFormValues = z.infer<typeof formSchema>;
@@ -43,7 +44,10 @@ export function LocationFormDialog({
 	const createMutation = useCreateLocation();
 	const form = useForm<LocationFormValues>({
 		resolver: zodResolver(formSchema),
-		defaultValues: { name: "" },
+		defaultValues: { 
+			name: "",
+			capacity: -1,
+		},
 	});
 
 	const onSubmit = (values: LocationFormValues) => {
