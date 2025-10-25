@@ -44,6 +44,7 @@ export function LocationFormDialog({
 	const createMutation = useCreateLocation();
 	const form = useForm<LocationFormValues>({
 		resolver: zodResolver(formSchema),
+		//added capacity field that defaults to -1
 		defaultValues: { 
 			name: "",
 			capacity: -1,
