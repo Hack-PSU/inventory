@@ -70,7 +70,6 @@ export function NewBulkMoveDialog({
 					setScannedItems((prev) => [...prev, foundItem]);
 					toast.success(`Added item: ${foundItem.name || foundItem.assetTag}`);
 				}
-				setShowScanner(false);
 			} else {
 				toast.error(`No item found with code: ${scannedValue}`);
 			}
