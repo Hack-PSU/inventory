@@ -2651,13 +2651,6 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.8.tgz#6b79032e760a0899cd4204710beede972a3a185f"
   integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
 
-"@posthog/core@1.29.6":
-  version "1.29.6"
-  resolved "https://registry.yarnpkg.com/@posthog/core/-/core-1.29.6.tgz#1647ed5137623f07acaafabf4d09d444f6719763"
-  integrity sha512-qLA/4xTzxG1FabliYjsOy5pTC9XZWA225MHnpCmqGBoDVGL4sKKgLixMK2dpsHZbSo6AHpBLUfqkvTsh2YxZcQ==
-  dependencies:
-    "@posthog/types" "1.374.3"
-
 "@posthog/core@1.29.8":
   version "1.29.8"
   resolved "https://registry.yarnpkg.com/@posthog/core/-/core-1.29.8.tgz#4c7d7eab6c215325bbe1171ef722840092fddcb4"
@@ -2665,15 +2658,22 @@
   dependencies:
     "@posthog/types" "1.375.0"
 
-"@posthog/types@1.374.3":
-  version "1.374.3"
-  resolved "https://registry.yarnpkg.com/@posthog/types/-/types-1.374.3.tgz#a30d7e3b4dad19246af7f9192944ba9baf97ee13"
-  integrity sha512-AewLXVP/JR0iUTcY3wkYeDomNDAEWagX6g+39U61HyYcnWOjxzEVPsMGV2VdVjaAP2lRtkIOc00EzoIc9fIZ+Q==
+"@posthog/core@1.29.9":
+  version "1.29.9"
+  resolved "https://registry.yarnpkg.com/@posthog/core/-/core-1.29.9.tgz#58133ce5d21ff21574f3629e227df766ccab6a6e"
+  integrity sha512-DjvuIyBZ2Z/gBhtZlITlM2D8PlnMsHSQ1D78dbUYoVsgGguvanpJTobZObjLlFkybyvfZFYkpoJkFNI/2Pw4IQ==
+  dependencies:
+    "@posthog/types" "1.376.0"
 
 "@posthog/types@1.375.0":
   version "1.375.0"
   resolved "https://registry.yarnpkg.com/@posthog/types/-/types-1.375.0.tgz#56d54d49dedab6eecd52708842b7a2bd724dc3d6"
   integrity sha512-ykjHtJv1eUnEUQIuCavMi/+lnBhZPRVnFDrbG6m4fS+vZ3ajn8dGooPpbWjF33Uo4g7W4ew51dBtJGf2evvurA==
+
+"@posthog/types@1.376.0":
+  version "1.376.0"
+  resolved "https://registry.yarnpkg.com/@posthog/types/-/types-1.376.0.tgz#e69201709db3baee4caaf9b95c06e7d294ff2c9a"
+  integrity sha512-gbFfxCuZDs/D4QZMwdE+smD1jsuqgGpS6yKGHZZ19foxMy8RYHsU1E47iG1b88n/uN02fAabLibVwuxLtq8juw==
 
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
   version "1.1.2"
@@ -7806,11 +7806,11 @@ posthog-js@^1.257.0:
     web-vitals "^5.1.0"
 
 posthog-node@^5.5.1:
-  version "5.34.8"
-  resolved "https://registry.yarnpkg.com/posthog-node/-/posthog-node-5.34.8.tgz#0961f9903469bf9bf26403de2b87cbf7a3082f9e"
-  integrity sha512-qSHeUYcUs8oG61gYVomRie+7CEf/WFjpxHthK/K9S0vNcFx0jzzeywTtKF6ScxsRW1sLXt0wYdxNPsni7Y6Q+A==
+  version "5.35.1"
+  resolved "https://registry.yarnpkg.com/posthog-node/-/posthog-node-5.35.1.tgz#1d3f54a6e4a4a091854d21c877b701935f4ae136"
+  integrity sha512-F9S3pEIYfGEVjLYIFHKaqfTIhn5IpS02Dkp7C/f1rqr4Z67Iqbt4jbKO8raWsT0veEI3rUp+DKuXLW1hN07FQA==
   dependencies:
-    "@posthog/core" "1.29.6"
+    "@posthog/core" "1.29.9"
 
 preact@^10.28.2:
   version "10.29.2"
