@@ -2651,24 +2651,12 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.8.tgz#6b79032e760a0899cd4204710beede972a3a185f"
   integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
 
-"@posthog/core@1.29.10":
-  version "1.29.10"
-  resolved "https://registry.yarnpkg.com/@posthog/core/-/core-1.29.10.tgz#df8f7511931f843db2962b367a0a5c0bf0e33ec2"
-  integrity sha512-j4wa+E8z3dNM7tEb/tvUjEw7hHQQzHy4K/WRwwBwWdsOfOYRsLmnz15r4Men6ZQNIKyMUkK2RanWwptdGT4oIg==
-  dependencies:
-    "@posthog/types" "1.376.1"
-
 "@posthog/core@1.29.11":
   version "1.29.11"
   resolved "https://registry.yarnpkg.com/@posthog/core/-/core-1.29.11.tgz#9387a15381a49ac8dc0df5a3c640dd1a9cf2ffc3"
   integrity sha512-/4EF7oxAFSWJgaXxppT8bdYp7MGAnWFnKz994+MetTz/T6CKbYpjqIXHCofQXtcOXjEclTYj91igA+IkVFKiSg==
   dependencies:
     "@posthog/types" "1.376.2"
-
-"@posthog/types@1.376.1":
-  version "1.376.1"
-  resolved "https://registry.yarnpkg.com/@posthog/types/-/types-1.376.1.tgz#a7391d6147f14d11746207f30d68398d8896d922"
-  integrity sha512-aat3Fvb7sbBpA6DSaNp7Vy3IAL2j28wkg/AVgYSwxX9Fae0K2W42DWQpNpUS4HSFcJb7RpC5XJboKddpVDXfQw==
 
 "@posthog/types@1.376.2":
   version "1.376.2"
@@ -4981,9 +4969,9 @@ dom-helpers@^5.0.1:
     csstype "^3.0.2"
 
 dompurify@^3.3.2:
-  version "3.4.5"
-  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-3.4.5.tgz#bedc7d30a6007ae9a8937b952be6adb76a28e871"
-  integrity sha512-OrwIBKsdNSVEeubdJ1HBv/wNENRM9ytAVCv7YXt//A3vPdVMNuACRqK9mXCGCBW2ln7BT/A4X0jXHo2Gu89miA==
+  version "3.4.6"
+  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-3.4.6.tgz#8f73010d14a46cd9781bbd3630f3bcef025a2111"
+  integrity sha512-+7gzEI8trIIQkVCvQ3ucGtNfH3nOmDgVTzc62rAAOlMxLth78pwpPoZCPc7CyRzAQF89MqcfPdEWkDwnjgqktg==
   optionalDependencies:
     "@types/trusted-types" "^2.0.7"
 
@@ -7787,17 +7775,17 @@ postcss@^8, postcss@^8.4.47:
     source-map-js "^1.2.1"
 
 posthog-js@^1.257.0:
-  version "1.376.1"
-  resolved "https://registry.yarnpkg.com/posthog-js/-/posthog-js-1.376.1.tgz#38fcb0797e946ca19149ac7bf4f53a32ac44d3a3"
-  integrity sha512-JKVcC9ql2YzyfLLjqwxoxl5aDiUZkU2FG5ZToagMPFZrCIok+38GunWTIdXqkwN8fv59NDZsoJEvaY6OzetQ+A==
+  version "1.376.2"
+  resolved "https://registry.yarnpkg.com/posthog-js/-/posthog-js-1.376.2.tgz#e9da67f051fc525965cab7bff34450bd448f86a3"
+  integrity sha512-Anz2pCp7dcNbammTExiZpcKC08dxfrHYaJgaXH6rq5x3Zcfj/4FkcMJF2cGCrdQXel5Y4vftiVSseZda0HAQTQ==
   dependencies:
     "@opentelemetry/api" "^1.9.0"
     "@opentelemetry/api-logs" "^0.208.0"
     "@opentelemetry/exporter-logs-otlp-http" "^0.208.0"
     "@opentelemetry/resources" "^2.2.0"
     "@opentelemetry/sdk-logs" "^0.208.0"
-    "@posthog/core" "1.29.10"
-    "@posthog/types" "1.376.1"
+    "@posthog/core" "1.29.11"
+    "@posthog/types" "1.376.2"
     core-js "^3.38.1"
     dompurify "^3.3.2"
     fflate "^0.4.8"
