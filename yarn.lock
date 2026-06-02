@@ -2658,10 +2658,22 @@
   dependencies:
     "@posthog/types" "1.376.5"
 
+"@posthog/core@1.30.2":
+  version "1.30.2"
+  resolved "https://registry.yarnpkg.com/@posthog/core/-/core-1.30.2.tgz#102dabfe70aab682ad9425bbde0f31824bd0776d"
+  integrity sha512-d7RTpfi+/q5+SZ+4f1WhanfEtNBz9onMmUxn3BO0GDT8N5ZT4DEP3LqFisqeP+xkJTaFPWCOVA/nGyKmUX9y9g==
+  dependencies:
+    "@posthog/types" "1.378.1"
+
 "@posthog/types@1.376.5":
   version "1.376.5"
   resolved "https://registry.yarnpkg.com/@posthog/types/-/types-1.376.5.tgz#db6230dc44d1333d9c96384c2d0cd8e1a4b0922a"
   integrity sha512-NhpEto2LtaGtdN+xqvh48wiFtAkdA+4onNaUrETnilrvJOqk95jAiPd2n/AXE/TT9zRyivQHhXwFowBInGldiQ==
+
+"@posthog/types@1.378.1":
+  version "1.378.1"
+  resolved "https://registry.yarnpkg.com/@posthog/types/-/types-1.378.1.tgz#9b2666b1c6ce41c2f1aa98f5feb4cb5e811e765f"
+  integrity sha512-bKOXVWySe5oKFjV6X9VW9jngIm14d4BvnT7l/Eb7e6DrT5uD+XclvbRdhC5f1/l5KwoIU+qswBobHRPlix2D1w==
 
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
   version "1.1.2"
@@ -7768,17 +7780,17 @@ postcss@^8, postcss@^8.4.47:
     source-map-js "^1.2.1"
 
 posthog-js@^1.257.0:
-  version "1.376.5"
-  resolved "https://registry.yarnpkg.com/posthog-js/-/posthog-js-1.376.5.tgz#55e69d2ad8eed86fbabfcbea1488150edbb2b731"
-  integrity sha512-Fa3QluqdwhprwQ+A38Hhirbw4s6f06KYeN/k4Cnp/xmSASbKDRHdphdh2/AYwXgnK1oS+LK5yAt43whc0z9I5w==
+  version "1.378.1"
+  resolved "https://registry.yarnpkg.com/posthog-js/-/posthog-js-1.378.1.tgz#6d209cb4e1be201e5afb0e2b30f9fe4de6e48265"
+  integrity sha512-pr9hu7J9eKCWlDxGfn5jbqcaTvaS+quRVxMKo7XRiKHPtFpXoIStOctkRTMumz8LucgD4l5NVbtsaZDi6OrrLQ==
   dependencies:
     "@opentelemetry/api" "^1.9.0"
     "@opentelemetry/api-logs" "^0.208.0"
     "@opentelemetry/exporter-logs-otlp-http" "^0.208.0"
     "@opentelemetry/resources" "^2.2.0"
     "@opentelemetry/sdk-logs" "^0.208.0"
-    "@posthog/core" "1.29.14"
-    "@posthog/types" "1.376.5"
+    "@posthog/core" "1.30.2"
+    "@posthog/types" "1.378.1"
     core-js "^3.38.1"
     dompurify "^3.3.2"
     fflate "^0.4.8"
