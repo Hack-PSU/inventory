@@ -2546,24 +2546,12 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.8.tgz#6b79032e760a0899cd4204710beede972a3a185f"
   integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
 
-"@posthog/core@^1.32.3":
-  version "1.32.3"
-  resolved "https://registry.yarnpkg.com/@posthog/core/-/core-1.32.3.tgz#4ea8177e007c17ffee74def62e41e0f6951ad343"
-  integrity sha512-vwOEMfZvGv5XxNWV7p9I52NSmvFNMhyW2IHpIoUHW5jLkgUrknzJW1H/qxVGSIrNNVQkfsoaDFzDhJdg10pgrA==
-  dependencies:
-    "@posthog/types" "1.386.3"
-
 "@posthog/core@^1.32.4":
-  version "1.32.4"
-  resolved "https://registry.yarnpkg.com/@posthog/core/-/core-1.32.4.tgz#e7efebf206674ef6dcfcf6a11a9ccfbbc37538f2"
-  integrity sha512-xmc6JGLS+HK9gG354e3ws8wRQSQFaekI/QC/uwslokfG1csXjxW7xlGGipLS4juDJ1W1fVM6j2MeHyatmvF22w==
+  version "1.32.5"
+  resolved "https://registry.yarnpkg.com/@posthog/core/-/core-1.32.5.tgz#49c629b161c138f5a51a388d79feea7dc4d5bc6d"
+  integrity sha512-Vmr6LZms7QEP1ljfTRRBVtLkeEHMrTmLECt0FXPLwUIgPwxOgvBdAYwRMWyP13WuN/XQweo1tJ9J1DxHNAF3qg==
   dependencies:
     "@posthog/types" "^1.386.4"
-
-"@posthog/types@1.386.3":
-  version "1.386.3"
-  resolved "https://registry.yarnpkg.com/@posthog/types/-/types-1.386.3.tgz#2703a3b83a80c24524283c515334bdf407be9f9b"
-  integrity sha512-LqJoiQi2eyWn7rCUgnn+D+F3Efp6+04o72bjSX6kWHx0nFaYNC/nJuAIRliDTY/X7GPIUAaHAcSjbMI/9wfX1Q==
 
 "@posthog/types@^1.386.4":
   version "1.386.4"
@@ -7748,11 +7736,11 @@ posthog-js@^1.257.0:
     web-vitals "^5.1.0"
 
 posthog-node@^5.5.1:
-  version "5.37.0"
-  resolved "https://registry.yarnpkg.com/posthog-node/-/posthog-node-5.37.0.tgz#48d1afbb43531dd7ec60badfefd7e7fa9c6d2d91"
-  integrity sha512-wFwWGcqAqZ1WJRlNNYc92veV83d1lOQcP4Lq0q7Kar9GdZLPpiFYHeudyybYJnjZjkI9v06vLvY/Og5CZIfByg==
+  version "5.37.1"
+  resolved "https://registry.yarnpkg.com/posthog-node/-/posthog-node-5.37.1.tgz#c1c17c62f8954d2b0479e047ba7211f430fa7885"
+  integrity sha512-CU2o/FGCyvKQSCsQhc6iA3lc50xMWTqSEpKS8HINABj87YD9iefEqDQWVWJ4TABcpDo5fkbjTyRig/zMe/WNQw==
   dependencies:
-    "@posthog/core" "^1.32.3"
+    "@posthog/core" "^1.32.4"
 
 preact@^10.28.2:
   version "10.29.2"
