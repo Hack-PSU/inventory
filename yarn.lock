@@ -2764,12 +2764,12 @@
     "@posthog/core" "^1.54.2"
     "@posthog/types" "^1.412.1"
 
-"@posthog/core@^1.54.2", "@posthog/core@^1.54.4":
-  version "1.54.4"
-  resolved "https://registry.yarnpkg.com/@posthog/core/-/core-1.54.4.tgz#b62ecbad90fa4beee82692957a32262f2a6720b6"
-  integrity sha512-Y5SWMUqeiq4R7h1ZflP0iGlqq1SSMNnFHz0XIUAXxuPDyOaZu1UVTefc2qCPRWPR3nQ9bx3LeQEBu9tw8fNHvg==
+"@posthog/core@^1.54.2", "@posthog/core@^1.55.0":
+  version "1.55.0"
+  resolved "https://registry.yarnpkg.com/@posthog/core/-/core-1.55.0.tgz#8b97b38fb9f970664b4a1893aed834eed8a1a8d2"
+  integrity sha512-x+0FR+uHsK3uJeofd5X4S2YS7hjaWkzkPN0X1GROHm9SvKw2RJ91kfQ7gT1bPtFwZSHNiRtteB7fX/xEMRN0IQ==
   dependencies:
-    "@posthog/types" "^1.412.1"
+    "@posthog/types" "^1.412.2"
 
 "@posthog/types@^1.412.1", "@posthog/types@^1.412.2":
   version "1.412.2"
@@ -8042,12 +8042,12 @@ postcss@^8, postcss@^8.4.47:
     source-map-js "^1.2.1"
 
 posthog-js@^1.257.0:
-  version "1.434.0"
-  resolved "https://registry.yarnpkg.com/posthog-js/-/posthog-js-1.434.0.tgz#e1c5cf8b48402df2939d0cea14639ada3a51f5a2"
-  integrity sha512-4h3OrJhflC8WS4t0b/av7x2cNCzmktO6Ey5punQbzFMZRqj+Mwh6C2MWTwhO4w5HEIf2XWh4SiFokgWILHk9qw==
+  version "1.434.2"
+  resolved "https://registry.yarnpkg.com/posthog-js/-/posthog-js-1.434.2.tgz#168ec1113f6da89adab4b338dfb66cd5a66c9738"
+  integrity sha512-xyvjj88U2Cp1JfDzmifLvNbdiY/z+YbTT1DaRRKRZ+qzaF9IKqMLumpv8jTKGh6y3m4vc3xz0ku8h5Tw0XU9zQ==
   dependencies:
     "@posthog/browser-common" "^0.9.0"
-    "@posthog/core" "^1.54.4"
+    "@posthog/core" "^1.55.0"
     "@posthog/types" "^1.412.2"
     core-js "^3.49.0"
     dompurify "^3.4.13"
